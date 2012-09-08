@@ -8,7 +8,6 @@ import android.widget.Toast;
 
 import com.box.androidlib.activities.BoxAuthentication;
 
-import com.metacube.boxforce.R;
 
 /**
  * Demonstrates how to use com.box.androidlib.actitivies.BoxAuthentication

@@ -26,4 +26,5 @@ public class Constants {
     public static RestClient client; 
     public static final String PREFS_FILE_NAME = "prefs";
     public static final String PREFS_KEY_AUTH_TOKEN = "AUTH_TOKEN";
+    public static final String ITEM_TYPE_LIST_ITEM = "LIST_ITEM";
 }

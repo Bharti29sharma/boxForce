@@ -85,6 +85,11 @@
         <activity
             android:name="com.metacube.boxforce.ForceRecordTypeList"
             android:configChanges="orientation|keyboardHidden" />
+          <activity
+            android:name="com.metacube.boxforce.SalesForceObjectChooser"
+            android:configChanges="orientation|keyboardHidden" />
+        
+        
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />

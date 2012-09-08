@@ -1,9 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+ <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/list_item_main_text"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:padding="10dp"
     android:textSize="16sp" >
 </TextView>
+ 
+
+
+
+<!-- <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="@dimen/common_list_item_layout_height" >
+
+    <ImageView
+        android:id="@+id/list_item_checkbox_image"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:layout_centerVertical="true"
+       
+        android:background="@drawable/button_unchecked"
+        android:layout_alignParentLeft="true"
+        android:scaleType="fitCenter"
+      />
+    
+    <TextView
+        android:id="@+id/list_item_main_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:paddingRight="40dp"
+        android:scaleType="fitCenter"
+        android:text="Item1 "
+        android:textSize="16sp" >
+
+</TextView>
+    
+    </RelativeLayout>
+ -->
