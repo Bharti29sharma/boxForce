@@ -1,8 +1,12 @@
 package com.metacube.boxforce;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.entity.StringEntity;
@@ -20,8 +24,10 @@ import com.salesforce.androidsdk.rest.RestResponse;
 import android.app.Activity;
 import android.net.ParseException;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ListView;
@@ -38,8 +44,9 @@ public class SalesForceObjectChooser extends Activity implements OnClickListener
 	private RestClient salesforceRestClient;
 	boolean flag=true;
 	Spinner objectSpinner, fieldSpinner;
-	RestRequest sobjectsRequest, recordsRequest;
+	RestRequest sobjectsRequest, recordsRequest,attchReq;
 	CommonSpinnerAdapter objectsSpinnerAdapter, fieldsSpinnerAdapter;
+	TemplateApp templateApp;
 	
 
 
@@ -48,7 +55,8 @@ public class SalesForceObjectChooser extends Activity implements OnClickListener
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.salesforce_object_chooser_layout);
 		
-		 
+		templateApp = ((TemplateApp) getApplicationContext());
+		
 		API_VERSION = getString(R.string.api_version);
 		salesforceRestClient = Constants.client;
 	
@@ -90,7 +98,7 @@ public class SalesForceObjectChooser extends Activity implements OnClickListener
 			long id) {
 	if(fieldsSpinnerAdapter==(CommonSpinnerAdapter)arg0.getAdapter())
 	{
-		/*if(flag)
+		if(flag)
 		{
 		Toast.makeText(SalesForceObjectChooser.this, "Record", 1).show();
 		flag= false;
@@ -98,9 +106,14 @@ public class SalesForceObjectChooser extends Activity implements OnClickListener
 		else
 		{
 			
-			Toast.makeText(SalesForceObjectChooser.this, "send files", 1).show();
+		CommonListItems item = (CommonListItems) fieldsSpinnerAdapter.getItem(position-1);	
+		sendToSalesForce(templateApp.getList(),item.getId());
+		
+		
 		}
-			*/
+			
+		
+		
 		
 	}
 	else
@@ -145,9 +158,7 @@ public class SalesForceObjectChooser extends Activity implements OnClickListener
 			try 
 			{
 				responseObject = response.asJSONObject();
-				//ArrayList<String> objList = setSupportedObject();
 				
-				//NotepriseLogger.logMessage(responseObject.toString());
 				ArrayList<CommonListItems> items = new ArrayList<CommonListItems>();
 				JSONArray sobjects = responseObject.getJSONArray("sobjects");
 				for (int i=0; i < sobjects.length(); i++)
@@ -216,7 +227,7 @@ public class SalesForceObjectChooser extends Activity implements OnClickListener
 				else
 				{
 				fieldsSpinnerAdapter = new CommonSpinnerAdapter(getLayoutInflater(), items);
-				flag=true;
+				
 				//fieldsSpinnerAdapter.changeOrdering(Constants.SORT_BY_LABEL);
 				fieldSpinner.setAdapter(fieldsSpinnerAdapter);
 				fieldSpinner.setOnItemSelectedListener(this);
@@ -237,7 +248,14 @@ public class SalesForceObjectChooser extends Activity implements OnClickListener
 			{
 				e.printStackTrace();
 			}
-		}		
+		}	
+		
+		else if(request == attchReq)
+		{
+			 
+			
+
+		}
 		
 	}
 
@@ -308,6 +326,89 @@ public class SalesForceObjectChooser extends Activity implements OnClickListener
 
 	
 	}
+	
+	
+	
+	private void sendToSalesForce(ArrayList<File> filesList,String parentID) {
+
+		int count = filesList.size();
+		String encodedImage = null;
+		String mimeType;
+		String boxFileName;
+		String boxFilePath;
+	
+		for (int index = 0; index < count; index++) {
+
+			File boxFile = filesList.get(index);
+
+			if (boxFile.canRead()) {
+
+				 boxFileName = boxFile.getName();
+				 boxFilePath = boxFile.getPath();
+
+				mimeType = getMimeType(boxFile.getPath());
+
+				FileInputStream fileInputStream = null;
+
+				byte[] bFile = new byte[(int) boxFile.length()];
+
+				// convert file into array of bytes
+				try {
+					fileInputStream = new FileInputStream(boxFile);
+					fileInputStream.read(bFile);
+					fileInputStream.close();
+					encodedImage = Base64.encodeToString(bFile, Base64.DEFAULT);
+					//encodeImgList.add(encodedImage);
+
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				String objectType = "Attachment";
+				Map<String, Object> fields = new HashMap<String, Object>();
+				fields.put("ParentID", parentID);
+				fields.put("Body", encodedImage);
+				fields.put("Name", boxFileName);
+				// fields.put("ContentType", "image/jpeg");
+				fields.put("ContentType", mimeType);
+
+				try {
+
+					
+					 attchReq = RestRequest.getRequestForCreate(
+							 API_VERSION, objectType, fields);
+					
+					 salesforceRestClient.sendAsync(attchReq, this);
+
+					/*com.metacube.boxforce.MainActivity
+							.sendRequest(req);*/
+
+				} catch (Exception e) {
+				}
+
+			}
+		}
+
+	}
+
+	
+	
+	 
+	public static String getMimeType(String url) {
+		String type = null;
+		String extension = MimeTypeMap.getFileExtensionFromUrl(url);
+		if (extension != null) {
+			MimeTypeMap mime = MimeTypeMap.getSingleton();
+			type = mime.getMimeTypeFromExtension(extension);
+		}
+		return type;
+	}
+	
+	
+	
+	
+	
 	
 
 	/*public static RestResponse publishNoteToUserGroup(RestClient salesforceRestClient, String groupId, String noteContent, String SF_API_VERSION)

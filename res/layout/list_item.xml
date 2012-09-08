@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
- <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+  <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/list_item_main_text"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -8,10 +8,7 @@
     android:textSize="16sp" >
 </TextView>
  
-
-
-
-<!-- <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--  <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="@dimen/common_list_item_layout_height" >
 
@@ -40,4 +37,4 @@
 </TextView>
     
     </RelativeLayout>
- -->
+  -->

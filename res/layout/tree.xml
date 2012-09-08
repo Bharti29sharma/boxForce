@@ -42,12 +42,7 @@ limitations under the License.
         android:dividerHeight="1dp"
         android:listSelector="@drawable/common_list_selector" >
     </ListView>
-    <Button
-        android:id="@+id/okButtom"
-       	android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="#000000"
-        />
+    
   
     
 </LinearLayout>

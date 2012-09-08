@@ -42,6 +42,7 @@ import android.webkit.MimeTypeMap;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -118,11 +119,12 @@ public class Browse extends Activity implements OnClickListener,
 		  R.layout.footer, null);		  
 		  lv.addHeaderView(footer);
 		  
-		  okButton = (Button) findViewById(R.id.saveToSF_button);
+		  saveToSF = (Button) findViewById(R.id.saveToSF_button);
 		 
-		okButton.setOnClickListener(this);
+		  saveToSF.setOnClickListener(this);
 
-		adapter = new MyArrayAdapter(this, R.layout.list_item, items);
+	//	adapter = new MyArrayAdapter(this, R.layout.list_item, items);
+		  adapter = new MyArrayAdapter(this, items);
 		lv.setOnItemClickListener(this);
 		lv.setAdapter(adapter);
 
@@ -234,7 +236,7 @@ public class Browse extends Activity implements OnClickListener,
 		public long updated;
 	}
 
-	private class MyArrayAdapter extends ArrayAdapter<TreeListItem> {
+	/*private class MyArrayAdapter extends ArrayAdapter<TreeListItem> {
 
 		private final Context context;
 		int listItemResourceId;
@@ -258,11 +260,11 @@ public class Browse extends Activity implements OnClickListener,
 			row = inflater.inflate(listItemResourceId, null);
 			tv = (TextView) row.findViewById(R.id.list_item_main_text);
 
-			/*
+			
 			 * if (items[position].type == TreeListItem.TYPE_FOLDER) {
 			 * tv.append("FOLDER: "); } else if (items[position].type ==
 			 * TreeListItem.TYPE_FILE) { tv.append("FILE: "); }
-			 */
+			 
 			tv.append(items[position].name);
 			tv.append("\n");
 			tv.append(DateFormat.getDateFormat(getApplicationContext()).format(
@@ -277,7 +279,71 @@ public class Browse extends Activity implements OnClickListener,
 		public int getCount() {
 			return items.length;
 		}
+	}*/
+	
+	
+	
+
+	private class MyArrayAdapter extends BaseAdapter {
+
+		private  Context context;
+		int listItemResourceId;
+		// TreeListItem[] objects;
+		TextView tv;
+
+	public MyArrayAdapter(Context contextt, TreeListItem[] objects) {
+			//super(contextt, objects);
+			// this.objects =objects;
+			///this.listItemResourceId = listItemResourceId;
+			context = contextt;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+
+			View row = convertView;
+
+			LayoutInflater inflater = ((Activity) context).getLayoutInflater();
+			row = inflater.inflate( R.layout.list_item, null);
+			
+			
+			
+			
+			tv = (TextView) row.findViewById(R.id.list_item_main_text);
+
+			
+			
+			tv.append(items[position].name);
+			tv.append("\n");
+			tv.append(DateFormat.getDateFormat(getApplicationContext()).format(
+					new Date(items[position].updated * 1000)));
+			tv.setPadding(10, 20, 10, 20);
+			tv.setTypeface(Typeface.DEFAULT_BOLD);
+			// }
+			return tv;
+		}
+
+		@Override
+		public int getCount() {
+			return items.length;
+		}
+
+		@Override
+		public Object getItem(int arg0) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public long getItemId(int position) {
+			// TODO Auto-generated method stub
+			return 0;
+		}
 	}
+
+	
+	
+	
 
 	private void sendToSalesForce(ArrayList<File> filesList) {
 
@@ -359,7 +425,7 @@ public class Browse extends Activity implements OnClickListener,
 
 	@Override
 	public void onClick(View v) {
-		if (v == okButton) {
+		if (v == saveToSF) {
 			
 
 			int fileCount = items.length;
