@@ -22,9 +22,12 @@ public class Constants {
     // IMPORTANT: Set this to your OpenBox API Key. This demo will not work
     // until you do so!!!
     // To get an API Key, go to https://www.box.net/developers
-    public static final String API_KEY = "pjgs2dnnmaman7yfpn0avxpic9k89ean	";
+    public static final String API_KEY = "q2cccyv2o4yz5764elf6icy7ixdzie0y ";
+    		/*"pambred0e4sbqfuzykl95uuu3362x4ei";*/
     public static RestClient client; 
     public static final String PREFS_FILE_NAME = "prefs";
     public static final String PREFS_KEY_AUTH_TOKEN = "AUTH_TOKEN";
     public static final String ITEM_TYPE_LIST_ITEM = "LIST_ITEM";
 }
+
+

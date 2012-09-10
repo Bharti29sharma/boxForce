@@ -209,6 +209,7 @@ public class SalesForceObjectChooser extends Activity implements
 			} else {
 				Toast.makeText(SalesForceObjectChooser.this,
 						"Successfully Attached", Toast.LENGTH_LONG).show();
+				finish();
 			}
 
 		}
@@ -259,7 +260,7 @@ public class SalesForceObjectChooser extends Activity implements
 		objList.add("Campaign");
 		objList.add("Case");
 		objList.add("Contact");
-		objList.add("Contract");
+		/*objList.add("Contract");*/
 		objList.add("Custom objects");
 		objList.add("EmailMessage");
 		objList.add("EmailTemplate");

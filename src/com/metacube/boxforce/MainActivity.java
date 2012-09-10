@@ -29,6 +29,7 @@ package com.metacube.boxforce;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
@@ -42,6 +43,7 @@ import android.app.Dialog;
 import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
@@ -59,6 +61,9 @@ import android.widget.Toast;
 
 
 
+import com.box.androidlib.Box;
+import com.box.androidlib.DAO.User;
+import com.box.androidlib.ResponseListeners.GetAccountInfoListener;
 import com.metacube.boxforce.R;
 import com.salesforce.androidsdk.app.ForceApp;
 import com.salesforce.androidsdk.rest.ClientManager;
@@ -85,6 +90,10 @@ public class MainActivity extends Activity implements OnClickListener {
 	private Button attachFileButton; 
 	private Button attachPDFFileButton; 
 	 private String fileName="";
+	  private TextView statusText;
+	    private Button homeButton;
+	    private Button authenticateButton;
+
 	
 	 String encodedImage = "";
 	 File fileS;
@@ -123,7 +132,13 @@ public class MainActivity extends Activity implements OnClickListener {
 		passcodeManager = ForceApp.APP.getPasscodeManager();		
 		
 		// Setup view
-		setContentView(R.layout.main);
+		setContentView(R.layout.splash);
+		 statusText = (TextView) findViewById(R.id.statusText);
+		 homeButton = (Button) findViewById(R.id.homeButton);
+		  authenticateButton = (Button) findViewById(R.id.authenticateButton);
+		  homeButton.setOnClickListener(this);
+		  authenticateButton.setOnClickListener(this);
+
 	}
 	
 	@Override 
@@ -131,7 +146,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		super.onResume();
 		
 		// Hide everything until we are logged in
-		findViewById(R.id.root).setVisibility(View.INVISIBLE);
+		//findViewById(R.id.root).setVisibility(View.INVISIBLE);
 		
 		// Bring up passcode screen if needed
 		if (passcodeManager.onResume(this)) {
@@ -155,27 +170,12 @@ public class MainActivity extends Activity implements OnClickListener {
 					}
 					MainActivity.this.client = client;
 					Constants.client=client;
-					getAccount();
-					// Show everything
-					//findViewById(R.id.root).setVisibility(View.VISIBLE);
 					
-					/*Intent intent = new Intent(MainActivity.this, Browse.class);
-			        //intent.putExtra("API_KEY", Constants.API_KEY); // API_KEY is required
-			        startActivity(intent);
-			        finish();*/
-			        
-					findViewById(R.id.root).setVisibility(View.VISIBLE);
+					BoxAuthenticationFunctionality();
+					/*findViewById(R.id.root).setVisibility(View.VISIBLE);
 					attachFileButton= (Button)findViewById(R.id.evernote_login_button);
 					attachFileButton.setOnClickListener(MainActivity.this);
-					
-					/*attachPDFFileButton= (Button)findViewById(R.id.pdfAttachment);
-					attachPDFFileButton.setOnClickListener(MainActivity.this);
 					*/
-					
-	
-					// Show welcome
-					//((TextView) findViewById(R.id.welcome_text)).setText(getString(R.string.welcome, client.getClientInfo().username));
-					
 				}
 			});
 		}
@@ -183,7 +183,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	
 	
-	
+	/*
 	private void getAccount(){
 
 		try {
@@ -240,11 +240,11 @@ public class MainActivity extends Activity implements OnClickListener {
 			displayError(e.getMessage());
 		}
 	}
-	
-	private static void displayError(String error)	{
+	*/
+	/*private static void displayError(String error)	{
 	
 	}
-
+*/
 
 	
 	
@@ -274,34 +274,27 @@ public class MainActivity extends Activity implements OnClickListener {
 	@Override
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
-		if(v==attachFileButton)
+		if(v==authenticateButton)
 		{
-		
-			
-			/*loadFileList();
-
-			showDialog(DIALOG_LOAD_FILE);*/
-			
-			Intent intent = new Intent(MainActivity.this, Splash.class);
-	        //intent.putExtra("API_KEY", Constants.API_KEY); // API_KEY is required
-	        startActivity(intent);
-	       // finish();
-			  
+				
+			 Intent intent = new Intent(MainActivity.this, Authentication.class);
+             startActivity(intent);
+         
+		}
+		if(v==homeButton)
+		{
+			Intent intent = new Intent(MainActivity.this, Browse.class);
+            startActivity(intent);
+            finish();
 		}
 		
-		if(v==attachPDFFileButton)
-		{
-			
-			
-		}
-
 		
 	}
 	
 	   
  
     
-    
+  /*  
   public static  void sendRequest(RestRequest request){
 
 		try {
@@ -336,9 +329,9 @@ public class MainActivity extends Activity implements OnClickListener {
 			displayError(e.getMessage());
 		}
 	}
-	
+	*/
     
-    private void loadFileList() {
+   /* private void loadFileList() {
 		try {
 			path.mkdirs();
 		} catch (SecurityException e) {
@@ -411,7 +404,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		};
 
 	}
-
+*/
 	private class Item {
 		public String file;
 		public int icon;
@@ -427,163 +420,68 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 	}
 
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		Dialog dialog = null;
-		AlertDialog.Builder builder = new Builder(this);
+	
+   private void  BoxAuthenticationFunctionality()
+   {
+	   if (Constants.API_KEY == null) {
+           Toast.makeText(getApplicationContext(),
+               "You must set your API key into Constants.java before you can use this demo app. Register at https://www.box.net/developers.",
+               Toast.LENGTH_LONG).show();
+           finish();
+           return;
+       }
+	   
+	   statusText.setText(getResources().getString(R.string.checking_login_status));
+       homeButton.setVisibility(View.GONE);
+       authenticateButton.setVisibility(View.GONE);
 
-		if (fileList == null) {
-			Log.e(TAG, "No files loaded");
-			dialog = builder.create();
-			return dialog;
-		}
+	   
+	   final SharedPreferences prefs = getSharedPreferences(Constants.PREFS_FILE_NAME, 0);
+       final String authToken = prefs.getString(Constants.PREFS_KEY_AUTH_TOKEN, null);
+       if (authToken == null) {
+           onNotLoggedIn();
+           
+       } else {
+           // We have an auth token. Let's execute getAccountInfo() and put the
+           // user's e-mail address up on the screen.
+           // This request will also serve as a way for us to verify that the
+           // auth token is actually still valid.
+           final Box box = Box.getInstance(Constants.API_KEY);
+           box.getAccountInfo(authToken, new GetAccountInfoListener() {
+               @Override
+               public void onComplete(final User boxUser, final String status) {
+                   // see http://developers.box.net/w/page/12923928/ApiFunction_get_account_info for possible status codes
+                   if (status.equals(GetAccountInfoListener.STATUS_GET_ACCOUNT_INFO_OK) && boxUser != null) {
+                       statusText.setText("Logged in as\n" + boxUser.getEmail());
+                       homeButton.setVisibility(View.VISIBLE);
+                       authenticateButton.setText("Log in as a different user");
+                       authenticateButton.setVisibility(View.VISIBLE);
+                   } else {
+                       // Could not get user info. It's possible the auth token
+                       // was no longer valid. Check the status code that was
+                       // returned.
+                       onNotLoggedIn();
+                   }
+               }
 
-		switch (id) {
-		case DIALOG_LOAD_FILE:
-			builder.setTitle("Choose your file");
-			builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					chosenFile = fileList[which].file;
-					File sel = new File(path + "/" + chosenFile);
-					if (sel.isDirectory()) {
+               @Override
+               public void onIOException(IOException e) {
+                   // No network connection?
+                   e.printStackTrace();
+                   onNotLoggedIn();
+               }
+           });
+       }
 
-						if (sel.canRead()) {
-							firstLvl = false;
+   }
+   
 
-							// Adds chosen directory to list
-							str.add(chosenFile);
-							fileList = null;
-							path = new File(sel + "");
-
-							loadFileList();
-
-							removeDialog(DIALOG_LOAD_FILE);
-							showDialog(DIALOG_LOAD_FILE);
-							Log.d(TAG, path.getAbsolutePath());
-						}
-
-						else {
-							Toast.makeText(
-									MainActivity.this,"[" + sel.getName()+ "] folder can't be read!", 1).show();
-
-						}
-
-					}
-
-					// Checks if 'up' was clicked
-					else if (chosenFile.equalsIgnoreCase("up") && !sel.exists()) {
-
-						// present directory removed from list
-						String s = str.remove(str.size() - 1);
-
-						// path modified to exclude present directory
-						path = new File(path.toString().substring(0,
-								path.toString().lastIndexOf(s)));
-						fileList = null;
-
-						// if there are no more directories in the list, then
-						// its the first level
-						if (str.isEmpty()) {
-							firstLvl = true;
-						}
-						loadFileList();
-
-						removeDialog(DIALOG_LOAD_FILE);
-						showDialog(DIALOG_LOAD_FILE);
-						Log.d(TAG, path.getAbsolutePath());
-
-					}
-					// File picked
-					else {
-						// Perform action with file picked
-						if (sel.canRead()) {
-						
-
-							//Intent intent = new Intent();
-							//intent.setAction(android.content.Intent.ACTION_VIEW);
-							 fileS = new File(sel.getPath());
-							 fileName = fileS.getName();
-							pathS = sel.getPath();
-							String mimeType = getMimeType(sel.getPath());
-
-			            	FileInputStream fileInputStream=null;
-			            	 
-			               
-			                byte[] bFile = new byte[(int) fileS.length()];
-			         
-			                
-			                    //convert file into array of bytes
-			        	    try {
-								fileInputStream = new FileInputStream(fileS);
-								fileInputStream.read(bFile);
-				        	    fileInputStream.close();
-				        	    encodedImage = Base64.encodeToString(bFile, Base64.DEFAULT);
-							} catch (Exception e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-			        	    
-							
-							
-							
-							
-							
-							 String objectType = "Attachment";
-				             Map<String, Object> fields = new HashMap<String, Object>();             
-				             fields.put("ParentID","0019000000F8a9b");
-				             fields.put("Body",encodedImage);
-				             fields.put("Name", fileName);
-				             //fields.put("ContentType", "image/jpeg");
-				             fields.put("ContentType", mimeType);
-				            
-				             
-				             
-				                
-				             try {
-				            
-				                 //RestRequest req = RestRequest.getRequestForUpsert(apiVersion, objectType, "AccountID", "0019000000F8a9b", fields);
-				                 RestRequest req = RestRequest.getRequestForCreate(apiVersion, objectType, fields);
-				               // Attachment a = new Attachment (ParentId = caseId, Body = pic, ContentType ="image/jpg",Name = "SendViaMyPhone");
-
-				                 sendRequest(req);
-				             
-				             } catch (Exception e) {}
-
-							
-							
-							
-							
-							
-							
-							
-						}
-						
-						else {
-							//Toast.makeText(M.this,"[" + sel.getName()+ "] file can't be read!", 1).show();
-						}
-
-					}
-
-				}
-			});
-			break;
-		}
-		dialog = builder.show();
-		return dialog;
-	}
-
-	public static String getMimeType(String url) {
-		String type = null;
-		String extension = MimeTypeMap.getFileExtensionFromUrl(url);
-		if (extension != null) {
-			MimeTypeMap mime = MimeTypeMap.getSingleton();
-			type = mime.getMimeTypeFromExtension(extension);
-		}
-		return type;
-	}
-
-    
+   private void onNotLoggedIn() {
+       statusText.setText("You are not logged in");
+       homeButton.setVisibility(View.GONE);
+       authenticateButton.setText("Log in");
+       authenticateButton.setVisibility(View.VISIBLE);
+   }
     
     
     

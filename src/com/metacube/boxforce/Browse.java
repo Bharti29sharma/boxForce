@@ -24,6 +24,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.LayoutInflater;
@@ -59,12 +60,17 @@ public class Browse extends Activity implements OnClickListener,
 	String boxFilePath;
 	String encodedImage;
 	String mimeType;
-	Button saveToSF;
+	Button editButton, saveToSF;
+	ImageView checkButtonImg;
 	ListView lv;
 	public static ArrayList<File> fList;
 	TemplateApp fileAttch;
 	View footer;
 	ProgressBar progressBar;
+	boolean editMode = true;
+	LayoutInflater inflater;
+	boolean previewMode = true;
+	View row;
 
 	ArrayList<String> encodeImgList;
 
@@ -92,8 +98,17 @@ public class Browse extends Activity implements OnClickListener,
 		}
 
 		lv = (ListView) findViewById(R.id.file_list);
-		saveToSF = (Button) findViewById(R.id.sendToSF);
-		saveToSF.setOnClickListener(Browse.this);
+		inflater = getLayoutInflater();
+		row = inflater.inflate(R.layout.list_row, null);
+		/*checkButtonImg = (ImageView) row
+				.findViewById(R.id.list_item_checkbox_image);
+*/
+		/*
+		 * View footerView = getLayoutInflater().inflate(R.layout.footer, null,
+		 * false); lv.addFooterView(footerView);
+		 */
+		editButton = (Button) findViewById(R.id.Edit);
+		editButton.setOnClickListener(Browse.this);
 		progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
 	}
@@ -106,9 +121,12 @@ public class Browse extends Activity implements OnClickListener,
 		fList = new ArrayList<File>();
 
 		items = new TreeListItem[0];
-		saveToSF = (Button) findViewById(R.id.sendToSF);
+		editButton = (Button) findViewById(R.id.Edit);
+		row = inflater.inflate(R.layout.list_row, null);
+		/*checkButtonImg = (ImageView) row
+				.findViewById(R.id.list_item_checkbox_image);*/
 
-		saveToSF.setOnClickListener(this);
+		editButton.setOnClickListener(this);
 		adapter = new MyArrayAdapter(this, items);
 		lv.setOnItemClickListener(this);
 		lv.setAdapter(adapter);
@@ -117,6 +135,7 @@ public class Browse extends Activity implements OnClickListener,
 	}
 
 	private void refresh() {
+		progressBar.setVisibility(View.VISIBLE);
 		final Box box = Box.getInstance(Constants.API_KEY);
 		box.getAccountTree(authToken, folderId,
 				new String[] { Box.PARAM_ONELEVEL },
@@ -129,11 +148,12 @@ public class Browse extends Activity implements OnClickListener,
 							Toast.makeText(getApplicationContext(),
 									"There was an error.", Toast.LENGTH_SHORT)
 									.show();
+							progressBar.setVisibility(View.INVISIBLE);
 							finish();
 							return;
 						}
 
-						progressBar.setVisibility(View.VISIBLE);
+						// progressBar.setVisibility(View.VISIBLE);
 
 						items = new TreeListItem[boxFolder.getFilesInFolder()
 								.size()];
@@ -147,6 +167,7 @@ public class Browse extends Activity implements OnClickListener,
 							TreeListItem item = new TreeListItem();
 							item.id = boxFile.getId();
 							item.name = boxFile.getFileName();
+							item.size = boxFile.getSize();
 							boxFile.getUpdated();
 							item.checked = false;
 							items[i] = item;
@@ -171,16 +192,29 @@ public class Browse extends Activity implements OnClickListener,
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
+		if (editMode) {
 
-		ImageView img = (ImageView) view
-				.findViewById(R.id.list_item_checkbox_image);
-		if (items[position].checked == true) {
-			items[position].checked = false;
-			img.setBackgroundResource(R.drawable.button_unchecked);
+			checkButtonImg = (ImageView) view
+					.findViewById(R.id.list_item_checkbox_image);
+			if (items[position].checked == true) {
+				items[position].checked = false;
+				checkButtonImg
+						.setBackgroundResource(R.drawable.button_unchecked);
 
-		} else if (items[position].checked == false) {
-			items[position].checked = true;
-			img.setBackgroundResource(R.drawable.button_checked);
+			} else if (items[position].checked == false) {
+				items[position].checked = true;
+				checkButtonImg.setBackgroundResource(R.drawable.button_checked);
+			}
+		} 
+		else {
+			File file = downloadfile(items[position]);
+			mimeType = getMimeType(file.getPath());
+
+			Intent i = new Intent();
+			i.setAction(android.content.Intent.ACTION_VIEW);
+			i.setDataAndType(Uri.fromFile(file), mimeType);
+			startActivity(i);
+
 		}
 
 	}
@@ -188,6 +222,7 @@ public class Browse extends Activity implements OnClickListener,
 	private class TreeListItem {
 
 		public long id;
+		public long size;
 		public String name;
 		public boolean checked;
 		@SuppressWarnings("unused")
@@ -218,17 +253,13 @@ public class Browse extends Activity implements OnClickListener,
 
 			title = (TextView) row.findViewById(R.id.title);
 
-			title.setText(items[position].name);
+			// title.setText(items[position].name);
 
-			/*
-			 * tv.append("\n");
-			 * tv.append(DateFormat.getDateFormat(getApplicationContext
-			 * ()).format( new Date(items[position].updated * 1000)));
-			 * tv.setPadding(10, 20, 10, 20);
-			 * tv.setTypeface(Typeface.DEFAULT_BOLD);
-			 */
-			// saveToSF.setOnClickListener(Browse.this);
-			// }
+			title.append(items[position].name);
+			title.append("\n");
+			title.append(fileSize(items[position].size));
+			
+			checkButtonImg =(ImageView) row.findViewById(R.id.list_item_checkbox_image);
 
 			return row;
 		}
@@ -263,33 +294,49 @@ public class Browse extends Activity implements OnClickListener,
 
 	@Override
 	public void onClick(View v) {
-		if (v == saveToSF) {
+		if (v == editButton) {
 
-			int fileCount = items.length;
-			for (int position = 0; position < fileCount; position++) {
-				if (items[position].checked) {
-					downloadfile(items[position]);
-				}
-			}
-
-			if (items.length == 0) {
-				Toast.makeText(Browse.this, "Select Files", 1).show();
+			if (editMode) {
+				checkButtonImg.setVisibility(View.VISIBLE);
+				editMode = false;
+				//previewMode = true;
 			} else {
+				checkButtonImg.setVisibility(View.INVISIBLE);
+				editMode = true;
+				//previewMode = false;
 
-				Intent intent = new Intent(Browse.this,
-						SalesForceObjectChooser.class);
-				startActivity(intent);
+			}
+		}
+
+		else if (v == saveToSF) {
+			if (editMode) {
+				int fileCount = items.length;
+				for (int position = 0; position < fileCount; position++) {
+					if (items[position].checked) {
+						downloadfile(items[position]);
+					}
+				}
+
+				if (items.length == 0) {
+					Toast.makeText(Browse.this, "Select Files", 1).show();
+				} else {
+
+					Intent intent = new Intent(Browse.this,
+							SalesForceObjectChooser.class);
+					startActivity(intent);
+				}
 			}
 		}
 
 	}
 
-	private void downloadfile(TreeListItem fileItem) {
-
+	private File downloadfile(TreeListItem fileItem) {
+		String path = "";
 		final Box box = Box.getInstance(Constants.API_KEY);
 		final java.io.File destinationFile = new java.io.File(
 				Environment.getExternalStorageDirectory() + "/"
 						+ URLEncoder.encode(fileItem.name));
+		path = destinationFile.getPath();
 
 		/*
 		 * final ProgressDialog downloadDialog = new
@@ -347,5 +394,23 @@ public class Browse extends Activity implements OnClickListener,
 						// downloadDialog.setProgress((int) bytesDownloaded);
 					}
 				});
+
+		return destinationFile;
+
 	}
+
+	String fileSize(long bytes) {
+		if (bytes < 1024)
+			return String.valueOf(bytes) + "bytes";
+
+		else if (bytes >= 1024 && bytes <= 1048575)
+			return String.valueOf(bytes / 1024) + "KB";
+
+		else if (bytes >= 1048576 && bytes <= 1073741823)
+			return String.valueOf(bytes / (1024.0 * 1024.0)) + "MB";
+
+		return String.valueOf(bytes / (1024.0 * 1024.0 * 1024.0)) + "GB";
+
+	}
+
 }
