@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/base_background"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/header_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+       
+         android:background="@drawable/main_nav_bar_background"
+        android:orientation="horizontal"
+        android:padding="@dimen/normal_margin_padding" >
+
+        <TextView
+            android:id="@+id/heading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="BoxForce"
+            android:paddingLeft="8dp"
+            android:textColor="@color/text_color_for_dark_background"
+            android:textSize="@dimen/common_large_text_size" />
+
+         <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginLeft="20dp"
+            
+            android:background="@drawable/spinner_blue_72" /> 
+
+        <Button
+            android:id="@+id/sendToSF"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/save_to_sf_button_selector"
+            android:layout_marginLeft="70dp"
+            />
+
+      
+
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/file_list"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:divider="#b5b5b5"
+        android:dividerHeight="1dp" />
+
+</LinearLayout>

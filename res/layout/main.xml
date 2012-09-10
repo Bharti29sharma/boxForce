@@ -6,7 +6,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:id="@+id/root"
-    android:background="@drawable/splash_background" >
+android:background="@drawable/main_nav_bar_background">
 
     <Button
         android:id="@+id/evernote_login_button"

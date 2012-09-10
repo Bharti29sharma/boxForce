@@ -8,9 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,282 +15,245 @@ import org.json.JSONObject;
 import com.salesforce.androidsdk.rest.RestClient;
 import com.salesforce.androidsdk.rest.RestClient.AsyncRequestCallback;
 import com.salesforce.androidsdk.rest.RestRequest;
-import com.salesforce.androidsdk.rest.RestRequest.RestMethod;
 import com.salesforce.androidsdk.rest.RestResponse;
-
 import android.app.Activity;
+import android.content.Context;
 import android.net.ParseException;
 import android.os.Bundle;
 import android.util.Base64;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
-public class SalesForceObjectChooser extends Activity implements OnClickListener, AsyncRequestCallback, OnItemSelectedListener 
-	
+public class SalesForceObjectChooser extends Activity implements
+		OnClickListener, AsyncRequestCallback, OnItemSelectedListener,
+		OnItemClickListener
+
 {
-	private ListView listView1;
 	ArrayList<String> objList;
 	private String API_VERSION;
 	private RestClient salesforceRestClient;
-	boolean flag=true;
-	Spinner objectSpinner, fieldSpinner;
-	RestRequest sobjectsRequest, recordsRequest,attchReq;
-	CommonSpinnerAdapter objectsSpinnerAdapter, fieldsSpinnerAdapter;
+	boolean flag = true;
+	Spinner objectSpinner;
+	RestRequest sobjectsRequest, recordsRequest, attchReq;
+	CommonSpinnerAdapter objectsSpinnerAdapter;// , fieldsSpinnerAdapter;
 	TemplateApp templateApp;
-	
-
+	ListView list;
+	ArrayList<CommonListItems> recordItems;
+	ArrayList<String> parentIdList;
+	AdapterBaseClass adapter;
+	Button save;
+	ProgressBar progressBar;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.salesforce_object_chooser_layout);
-		
+		setContentView(R.layout.object_chooser_list);
+
 		templateApp = ((TemplateApp) getApplicationContext());
-		
+
 		API_VERSION = getString(R.string.api_version);
 		salesforceRestClient = Constants.client;
-	
-		
-    	objectSpinner = (Spinner)findViewById(R.id.object_list_spinner);
-        fieldSpinner = (Spinner)findViewById(R.id.field_list_spinner);
+		parentIdList = new ArrayList<String>();
+
+		save = (Button) findViewById(R.id.save);
+		save.setOnClickListener(this);
+		list = (ListView) findViewById(R.id.record_list);
+		objectSpinner = (Spinner) findViewById(R.id.object_list_spinner);
+		progressBar = (ProgressBar) findViewById(R.id.progressBar);
+
 	}
-	
-	
 
 	@Override
-	public void onResume() 
-	{
+	public void onResume() {
 		super.onResume();
-		//baseActivity.salesforceObjectsButton.setVisibility(View.GONE);
-		if (salesforceRestClient != null)
-		{
-			//showProgresIndicator();	
-			
-			//RestResponse res  = publishNoteToUserGroup(salesforceRestClient,null,null,API_VERSION);
-			/*UrlEncodedFormEntity entity = new UrlEncodedFormEntity(postParams);
-		    entity.setContentEncoding(HTTP.UTF_8);
-		    entity.setContentType("application/json");
-		    
-			String url = "/services/data/" + API_VERSION + "/sobjects/Attachment/describe";
-			sobjectsRequest  = RestRequest(GET,url, entity)
-			salesforceRestClient.sendAsync(sobjectsRequest, this);*/
-		
-			
-			sobjectsRequest = RestRequest.getRequestForDescribeGlobal(API_VERSION);
-			salesforceRestClient.sendAsync(sobjectsRequest, this);		
+
+		if (salesforceRestClient != null) {
+			progressBar.setVisibility(View.VISIBLE);
+
+			sobjectsRequest = RestRequest
+					.getRequestForDescribeGlobal(API_VERSION);
+			salesforceRestClient.sendAsync(sobjectsRequest, this);
 		}
 	}
-	
-	
 
 	@Override
 	public void onItemSelected(AdapterView<?> arg0, View arg1, int position,
 			long id) {
-	if(fieldsSpinnerAdapter==(CommonSpinnerAdapter)arg0.getAdapter())
-	{
-		if(flag)
-		{
-		Toast.makeText(SalesForceObjectChooser.this, "Record", 1).show();
-		flag= false;
-		}
-		else
-		{
-			
-		CommonListItems item = (CommonListItems) fieldsSpinnerAdapter.getItem(position-1);	
-		sendToSalesForce(templateApp.getList(),item.getId());
+
+		CommonListItems item = (CommonListItems) objectsSpinnerAdapter.getItem(position);
 		
-		
-		}
-			
-		
-		
-		
-	}
-	else
-	{
-		
-		CommonListItems item = (CommonListItems) objectsSpinnerAdapter.getItem(position);	
-		if (salesforceRestClient != null)
-		{
-			//showProgresIndicator();
-			//	baseActivity.saveButton.setVisibility(View.GONE);
-			
-			
+		if (salesforceRestClient != null) {
+			progressBar.setVisibility(View.VISIBLE);
+			parentIdList = new ArrayList<String>();
 			try {
 				String soql = "select id, name from " + item.getName();
-				recordsRequest = RestRequest.getRequestForQuery(API_VERSION,soql);
+				recordsRequest = RestRequest.getRequestForQuery(API_VERSION,
+						soql);
 			} catch (UnsupportedEncodingException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
-			
-			salesforceRestClient.sendAsync(recordsRequest, this);			
+			salesforceRestClient.sendAsync(recordsRequest, this);
 		}
 	}
-	}
-
-
 
 	@Override
 	public void onNothingSelected(AdapterView<?> arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
-
-
 
 	@Override
 	public void onSuccess(RestRequest request, RestResponse response) {
 		JSONObject responseObject;
-		if (request == sobjectsRequest)
-		{
-			try 
-			{
+		if (request == sobjectsRequest) {
+			try {
 				responseObject = response.asJSONObject();
-				
+
 				ArrayList<CommonListItems> items = new ArrayList<CommonListItems>();
 				JSONArray sobjects = responseObject.getJSONArray("sobjects");
-				for (int i=0; i < sobjects.length(); i++)
-				{
+				for (int i = 0; i < sobjects.length(); i++) {
 					CommonListItems item = new CommonListItems();
 					JSONObject object = sobjects.getJSONObject(i);
-					
-					if (checkObjectItem(object) && setSupportedObject(object))
-					{
+
+					if (checkObjectItem(object) && setSupportedObject(object)) {
 						item.setLabel(object.optString("label"));
-						item.setName(object.optString("name"));						
+						item.setName(object.optString("name"));
 						items.add(item);
-					}					
+					}
 				}
-				objectsSpinnerAdapter = new CommonSpinnerAdapter(getLayoutInflater(), items);
-				//objectsSpinnerAdapter.changeOrdering(Constants.SORT_BY_LABEL);
+				progressBar.setVisibility(View.INVISIBLE);
+				objectsSpinnerAdapter = new CommonSpinnerAdapter(
+						getLayoutInflater(), items);
+				// objectsSpinnerAdapter.changeOrdering(Constants.SORT_BY_LABEL);
 				objectSpinner.setAdapter(objectsSpinnerAdapter);
 				objectSpinner.setOnItemSelectedListener(this);
-			} 
-			catch (ParseException e) 
-			{
+
+			} catch (ParseException e) {
 				e.printStackTrace();
-			} 
-			catch (JSONException e) 
-			{
+			} catch (JSONException e) {
 				e.printStackTrace();
-			} 
-			catch (IOException e) 
-			{
+				progressBar.setVisibility(View.INVISIBLE);
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		
-		else if (request == recordsRequest)
-		{
-			try 
-			{
-				responseObject = response.asJSONObject();
-				//NotepriseLogger.logMessage("fields"+responseObject.toString());
-				ArrayList<CommonListItems> items = new ArrayList<CommonListItems>();
-				JSONArray fields = responseObject.getJSONArray("records");
-				for (int i=0; i < fields.length(); i++)
-				{
-					CommonListItems item = new CommonListItems();
-					JSONObject field = fields.getJSONObject(i);
-					
-					/*if (filterObjectFieldForStringType(field))
-					{*/
-					
+
+		else if (request == recordsRequest) {
+			try {
+				if (!response.isSuccess()) {
+					response.toString();
+
+					ArrayList<CommonListItems> emptyList = new ArrayList<CommonListItems>();
+					adapter = new AdapterBaseClass(this, emptyList);
+					list.setOnItemClickListener(this);
+					list.setAdapter(adapter);
+					progressBar.setVisibility(View.INVISIBLE);
+					flag = true;
+
+				} else {
+					responseObject = response.asJSONObject();
+					// NotepriseLogger.logMessage("fields"+responseObject.toString());
+					recordItems = new ArrayList<CommonListItems>();
+					JSONArray fields = responseObject.getJSONArray("records");
+					for (int i = 0; i < fields.length(); i++) {
+						CommonListItems item = new CommonListItems();
+						JSONObject field = fields.getJSONObject(i);
+
+						parentIdList.add(field.optString("Id"));
 						item.setId(field.optString("Id"));
 						item.setLabel(field.optString("Name"));
-						items.add(item);
-					
-					
+						item.setIsChecked(false);
+						recordItems.add(item);
+
+					}
+					progressBar.setVisibility(View.INVISIBLE);
+					adapter = new AdapterBaseClass(
+							SalesForceObjectChooser.this, recordItems);
+					list.setOnItemClickListener(SalesForceObjectChooser.this);
+					list.setAdapter(adapter);
+
 				}
-				
-				if(fields.length()==0)
-				{
-					//fieldsSpinnerAdapter=null;
-					ArrayList<CommonListItems> emptyList = new ArrayList<CommonListItems>();
-					fieldsSpinnerAdapter = new CommonSpinnerAdapter(getLayoutInflater(), emptyList);
-					fieldSpinner.setAdapter(fieldsSpinnerAdapter);
-					flag=true;
-					
-				}
-				else
-				{
-				fieldsSpinnerAdapter = new CommonSpinnerAdapter(getLayoutInflater(), items);
-				
-				//fieldsSpinnerAdapter.changeOrdering(Constants.SORT_BY_LABEL);
-				fieldSpinner.setAdapter(fieldsSpinnerAdapter);
-				fieldSpinner.setOnItemSelectedListener(this);
-				}
-				
-				//baseActivity.saveButton.setVisibility(View.VISIBLE);
-				//hideProgresIndicator();
-			} 
-			catch (ParseException e) 
-			{
+			} catch (ParseException e) {
 				e.printStackTrace();
-			} 
-			catch (JSONException e) 
-			{
+				progressBar.setVisibility(View.INVISIBLE);
+			} catch (JSONException e) {
 				e.printStackTrace();
-			} 
-			catch (IOException e) 
-			{
+				progressBar.setVisibility(View.INVISIBLE);
+			} catch (IOException e) {
 				e.printStackTrace();
+
 			}
-		}	
-		
-		else if(request == attchReq)
-		{
-			 
-			
+		}
+
+		else if (request == attchReq) {
+			progressBar.setVisibility(View.INVISIBLE);
+			if (!response.isSuccess()) {
+				Toast.makeText(SalesForceObjectChooser.this, "Error",
+						Toast.LENGTH_LONG).show();
+			} else {
+				Toast.makeText(SalesForceObjectChooser.this,
+						"Successfully Attached", Toast.LENGTH_LONG).show();
+			}
 
 		}
-		
+
 	}
-
-
 
 	@Override
 	public void onError(Exception exception) {
-		// TODO Auto-generated method stub
-		
+		Toast.makeText(SalesForceObjectChooser.this, "Error", Toast.LENGTH_LONG)
+				.show();
+		progressBar.setVisibility(View.INVISIBLE);
+
 	}
-
-
 
 	@Override
 	public void onClick(View v) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	
-	public static Boolean checkObjectItem(JSONObject object)
-	{
-		if (		object.optString("triggerable").equalsIgnoreCase("true")
-				&& 	object.optString("searchable").equalsIgnoreCase("true")
-				&& 	object.optString("queryable").equalsIgnoreCase("true")
-			)
+
+		if (parentIdList.size() == 0)
 		{
+			Toast.makeText(SalesForceObjectChooser.this, "Select Any Record",
+					Toast.LENGTH_LONG).show();
+		}
+
+		else
+		{
+			progressBar.setVisibility(View.VISIBLE);
+		sendToSalesForce(templateApp.getList(), parentIdList);
+		}
+
+	}
+
+	public static Boolean checkObjectItem(JSONObject object) {
+		if (object.optString("triggerable").equalsIgnoreCase("true")
+				&& object.optString("searchable").equalsIgnoreCase("true")
+				&& object.optString("queryable").equalsIgnoreCase("true")) {
 			return true;
-		}		
+		}
 		return false;
 	}
-	
-	
+
 	public static boolean setSupportedObject(JSONObject object) {
-		
-		ArrayList<String>	objList= new ArrayList<String>(); 
-		
-		//boolean result = false;
+
+		ArrayList<String> objList = new ArrayList<String>();
+
+		// boolean result = false;
 		objList.add("Account");
 		objList.add("Asset");
 		objList.add("Campaign");
@@ -306,45 +266,36 @@ public class SalesForceObjectChooser extends Activity implements OnClickListener
 		objList.add("Event");
 		objList.add("Lead");
 		objList.add("Opportunity");
-		objList.add("Product2");
+		objList.add("Product");
 		objList.add("Solution");
 		objList.add("Task");
-		
-	
-				
-				for (int j=0; j < objList.size(); j++)
-				{
-					
-					if(objList.get(j).equalsIgnoreCase( object.optString("name"))) 
-					return true;
-			
-					
-				
-				}
-		
+
+		for (int j = 0; j < objList.size(); j++) {
+
+			if (objList.get(j).equalsIgnoreCase(object.optString("name")))
+				return true;
+
+		}
+
 		return false;
 
-	
 	}
-	
-	
-	
-	private void sendToSalesForce(ArrayList<File> filesList,String parentID) {
+
+	private void sendToSalesForce(ArrayList<File> filesList,
+			ArrayList<String> parentIDList) {
 
 		int count = filesList.size();
 		String encodedImage = null;
 		String mimeType;
 		String boxFileName;
-		String boxFilePath;
-	
 		for (int index = 0; index < count; index++) {
 
 			File boxFile = filesList.get(index);
 
 			if (boxFile.canRead()) {
 
-				 boxFileName = boxFile.getName();
-				 boxFilePath = boxFile.getPath();
+				boxFileName = boxFile.getName();
+				boxFile.getPath();
 
 				mimeType = getMimeType(boxFile.getPath());
 
@@ -358,43 +309,40 @@ public class SalesForceObjectChooser extends Activity implements OnClickListener
 					fileInputStream.read(bFile);
 					fileInputStream.close();
 					encodedImage = Base64.encodeToString(bFile, Base64.DEFAULT);
-					//encodeImgList.add(encodedImage);
+					// encodeImgList.add(encodedImage);
 
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
-				String objectType = "Attachment";
-				Map<String, Object> fields = new HashMap<String, Object>();
-				fields.put("ParentID", parentID);
-				fields.put("Body", encodedImage);
-				fields.put("Name", boxFileName);
-				// fields.put("ContentType", "image/jpeg");
-				fields.put("ContentType", mimeType);
+				for (int parentIndex = 0; parentIndex < parentIDList.size(); parentIndex++) {
 
-				try {
+					String objectType = "Attachment";
+					Map<String, Object> fields = new HashMap<String, Object>();
+					fields.put("ParentID", parentIDList.get(parentIndex));
+					fields.put("Body", encodedImage);
+					fields.put("Name", boxFileName);
+					// fields.put("ContentType", "image/jpeg");
+					fields.put("ContentType", mimeType);
 
-					
-					 attchReq = RestRequest.getRequestForCreate(
-							 API_VERSION, objectType, fields);
-					
-					 salesforceRestClient.sendAsync(attchReq, this);
+					try {
 
-					/*com.metacube.boxforce.MainActivity
-							.sendRequest(req);*/
+						attchReq = RestRequest.getRequestForCreate(API_VERSION,
+								objectType, fields);
 
-				} catch (Exception e) {
+						salesforceRestClient.sendAsync(attchReq, this);
+
+					} catch (Exception e) {
+						progressBar.setVisibility(View.INVISIBLE);
+					}
+
 				}
-
 			}
 		}
 
 	}
 
-	
-	
-	 
 	public static String getMimeType(String url) {
 		String type = null;
 		String extension = MimeTypeMap.getFileExtensionFromUrl(url);
@@ -404,52 +352,64 @@ public class SalesForceObjectChooser extends Activity implements OnClickListener
 		}
 		return type;
 	}
-	
-	
-	
-	
-	
-	
 
-	/*public static RestResponse publishNoteToUserGroup(RestClient salesforceRestClient, String groupId, String noteContent, String SF_API_VERSION)
-	{
-		RestResponse publishResponse = null;
-		if (salesforceRestClient != null)
-		{
-			try 
-			{				
-				
-				String url = "/services/data/" + SF_API_VERSION + "/sobjects/Attachment/describe";
-				
-				publishResponse = salesforceRestClient.sendSync(RestMethod.GET, url, null);
-				
-			} 
-			catch (UnsupportedEncodingException e) 
-			{
-				//NotepriseLogger.logError("UnsupportedEncodingException while publishing chatter feed to group.", NotepriseLogger.ERROR, e);
-			} 
-			catch (IOException e) 
-			{
-				//NotepriseLogger.logError("IOException while publishing chatter feed to group.", NotepriseLogger.ERROR, e);
-			}	
+	public class AdapterBaseClass extends BaseAdapter {
+
+		// private Activity activity;
+		private ArrayList<CommonListItems> itemList;
+
+		private LayoutInflater inflater = null;
+
+		// public ImageLoader imageLoader;
+
+		public AdapterBaseClass(Activity activity,
+				ArrayList<CommonListItems> itemList) {
+
+			this.itemList = itemList;
+			// this.activity = activity;
+			inflater = (LayoutInflater) activity
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
 		}
-		return publishResponse;
-	}	
-	
-	
-	
-	public static String getStringFromBundle(Bundle bundle, String identifier)
-	{
-		String bundleContents = "";
-		try 
-		{			
-			bundleContents = bundle.getString(identifier);		
-		} 
-		catch (Exception e) 
-		{
-			//NotepriseLogger.logError("Exception getting arguements.", NotepriseLogger.WARNING, e);
+
+		public int getCount() {
+			return itemList.size();
 		}
-		return bundleContents;
-	}*/
-	
+
+		public Object getItem(int position) {
+			return position;
+		}
+
+		public long getItemId(int position) {
+			return position;
+		}
+
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View vi = convertView;
+
+			vi = inflater.inflate(R.layout.list_row, null);
+			TextView title = (TextView) vi.findViewById(R.id.title);
+			title.setText(itemList.get(position).getLabel());
+
+			return vi;
+		}
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> arg0, View view, int position,
+			long id) {
+		ImageView img = (ImageView) view
+				.findViewById(R.id.list_item_checkbox_image);
+
+		if (recordItems.get(position).getIsChecked() == true) {
+			recordItems.get(position).setIsChecked(false);
+			img.setBackgroundResource(R.drawable.button_unchecked);
+
+		} else if (recordItems.get(position).getIsChecked() == false) {
+			recordItems.get(position).setIsChecked(true);
+			img.setBackgroundResource(R.drawable.button_checked);
+		}
+
+	}
+
 }

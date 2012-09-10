@@ -83,9 +83,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private String[] accountName;
 	private String[] accountID;
 	private Button attachFileButton; 
-	private byte[] byteArray;
-	 private static int RESULT_LOAD_IMAGE = 1;
-	 private Button attachPDFFileButton; 
+	private Button attachPDFFileButton; 
 	 private String fileName="";
 	
 	 String encodedImage = "";
