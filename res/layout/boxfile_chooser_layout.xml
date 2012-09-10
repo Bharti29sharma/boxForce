@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@drawable/base_background"
-    android:orientation="vertical" >
+    
+    android:background="@drawable/base_background" >
 
     <LinearLayout
         android:id="@+id/header_layout"
         android:layout_width="fill_parent"
         android:layout_height="50dp"
-       
-         android:background="@drawable/main_nav_bar_background"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/main_nav_bar_background"
         android:orientation="horizontal"
         android:padding="@dimen/normal_margin_padding" >
 
@@ -18,43 +18,54 @@
             android:id="@+id/heading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="BoxForce"
             android:paddingLeft="8dp"
+            android:text="BoxForce"
             android:textColor="@color/text_color_for_dark_background"
             android:textSize="@dimen/common_large_text_size" />
 
-         <ProgressBar
+        <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_marginLeft="20dp"
-            
-            android:background="@drawable/spinner_blue_72" /> 
+            android:background="@drawable/spinner_blue_72" />
 
         <Button
             android:id="@+id/Edit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/save_to_sf_button_selector"
             android:layout_marginLeft="70dp"
-            />
-
-      
-
+            android:background="@drawable/save_to_sf_button_selector" />
     </LinearLayout>
+    
+   
 
-    <ListView
+    <RelativeLayout
+        android:id="@+id/footer_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+      
+        android:background="@drawable/main_nav_bar_background"
+        android:padding="@dimen/normal_margin_padding" >
+
+        <Button
+            android:id="@+id/saveTosf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            
+            android:background="@drawable/save_to_sf_button_selector" />
+    </RelativeLayout>
+
+  <ListView
         android:id="@+id/file_list"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:divider="#b5b5b5"
+        android:layout_above="@id/footer_layout"
+        android:layout_below="@id/header_layout"
         android:cacheColorHint="#00000000"
-        android:dividerHeight="1dp" />
-    
-    
-    
-    
-    
-    
+        android:divider="#b5b5b5"
+        android:dividerHeight="1dp" />   
 
-</LinearLayout>
+</RelativeLayout>

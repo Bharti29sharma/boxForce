@@ -53,7 +53,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/header_layout"
-        
+       
         android:padding="@dimen/normal_margin_padding" >
 
         <Spinner
@@ -81,21 +81,6 @@
    
         android:dividerHeight="1dp" />
 
-    <LinearLayout
-        android:id="@+id/footer_layout"
-        android:layout_width="fill_parent"
-        android:layout_height="50dp"
-        android:background="@drawable/main_nav_bar_background"
-        android:orientation="horizontal"
-        android:padding="@dimen/normal_margin_padding"
-        android:layout_alignParentBottom="true" >
-
-        <Button
-            android:id="@+id/Edit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="70dp"
-            android:background="@drawable/save_to_sf_button_selector" />
-    </LinearLayout>
+   
 
 </LinearLayout>

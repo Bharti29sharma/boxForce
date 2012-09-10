@@ -18,7 +18,7 @@
         android:id="@+id/list_item_checkbox_image"
         android:layout_width="16dp"
         android:layout_height="16dp"
-       	android:visibility="invisible"
+      
         android:layout_marginRight="5dip"
         android:background="@drawable/button_unchecked"
       
@@ -48,7 +48,7 @@
        
         android:layout_marginLeft="200dip"
         android:background="@drawable/list_arrow"
-      
+       	android:visibility="invisible"
         android:scaleType="fitCenter"
       />
 </LinearLayout>
