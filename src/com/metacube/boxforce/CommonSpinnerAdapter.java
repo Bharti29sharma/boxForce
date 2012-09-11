@@ -66,7 +66,7 @@ public class CommonSpinnerAdapter extends BaseAdapter implements ListAdapter
 		return layout;
 	}
 	
-	/*public void changeOrdering(String orderType)
+	public void changeOrdering(String orderType)
 	{
 		// Sort By Name
 		if(orderType.equalsIgnoreCase(Constants.SORT_BY_NAME))
@@ -89,5 +89,5 @@ public class CommonSpinnerAdapter extends BaseAdapter implements ListAdapter
 			Collections.sort(items, new CommonListComparator(CommonListComparator.COMPARE_BY_LABEL));
 		}
 		notifyDataSetChanged();
-	}*/
+	}
 }

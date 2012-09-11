@@ -19,7 +19,7 @@ limitations under the License.
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:gravity="center"
-    android:background="#FFFFFF"
+    android:background="@drawable/splash_bg"
     >
 
     <ImageView
@@ -29,7 +29,7 @@ limitations under the License.
         android:contentDescription="@string/app_name"
         />
 
-    <TextView
+   <!--  <TextView
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
 	    android:textSize="20dp"
@@ -47,24 +47,27 @@ limitations under the License.
         android:paddingTop="10dp"
         android:gravity="center"
         android:text="@string/checking_login_status"  
-        />     
+        />      -->
         
     <Button
-        android:id="@+id/homeButton"
+        android:id="@+id/loginButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="10dp"
-        android:text="@string/continuex"  
-        android:visibility="gone"
+        android:layout_marginTop="30dp"
+        android:text="Login with Box"  
+        android:textColor="#87CEFA"
+        android:textStyle="bold"
+        android:background="@drawable/white_button_selector"
+        
         /> 
 
-    <Button
+   <!--  <Button
         android:id="@+id/authenticateButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingTop="10dp"
         android:text="@string/log_in"  
         android:visibility="gone"
-        /> 
+        />  -->
 
 </LinearLayout>

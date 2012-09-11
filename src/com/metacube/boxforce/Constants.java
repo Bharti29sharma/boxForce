@@ -15,6 +15,9 @@
 
 package com.metacube.boxforce;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 import com.salesforce.androidsdk.rest.RestClient;
 
 public class Constants {
@@ -28,6 +31,39 @@ public class Constants {
     public static final String PREFS_FILE_NAME = "prefs";
     public static final String PREFS_KEY_AUTH_TOKEN = "AUTH_TOKEN";
     public static final String ITEM_TYPE_LIST_ITEM = "LIST_ITEM";
+    
+    public static String SORT_BY_LABEL = "SORT_BY_LABEL";
+	public static String SORT_BY_NAME = "SORT_BY_NAME";
+	public static String SORT_BY_ID = "SORT_BY_ID";
+	public static String SORT_BY_SORT_ORDER = "SORT_BY_SORT_ORDER";	
+	
+	public static  ArrayList<CommonListItems> changeOrdering(String orderType,ArrayList<CommonListItems> items)
+	{
+		// Sort By Name
+		if(orderType.equalsIgnoreCase(Constants.SORT_BY_NAME))
+		{
+			Collections.sort(items, new CommonListComparator(CommonListComparator.COMPARE_BY_NAME));
+		}
+		// Sort By Date
+		else if(orderType.equalsIgnoreCase(""))
+		{
+			Collections.sort(items, new CommonListComparator(CommonListComparator.COMPARE_BY_SORT_DATA));
+		}
+		// Sort By id
+		else if (orderType.equalsIgnoreCase(Constants.SORT_BY_ID))
+		{
+			Collections.sort(items, new CommonListComparator(CommonListComparator.COMPARE_BY_ID));
+		}
+		// By default sort by Label
+		else
+		{
+			Collections.sort(items, new CommonListComparator(CommonListComparator.COMPARE_BY_LABEL));
+		}
+		//notifyDataSetChanged();
+		
+		return items;
+	}
+    
 }
 
 

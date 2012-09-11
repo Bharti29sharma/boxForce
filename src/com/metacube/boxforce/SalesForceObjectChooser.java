@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ import com.salesforce.androidsdk.rest.RestClient.AsyncRequestCallback;
 import com.salesforce.androidsdk.rest.RestRequest;
 import com.salesforce.androidsdk.rest.RestResponse;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -63,6 +65,8 @@ public class SalesForceObjectChooser extends Activity implements
 	AdapterBaseClass adapter;
 	Button save, logoutButton;
 	ProgressBar progressBar;
+	ProgressDialog dialog;
+
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -101,7 +105,7 @@ public class SalesForceObjectChooser extends Activity implements
 
 		if (salesforceRestClient != null) {
 			progressBar.setVisibility(View.VISIBLE);
-
+			
 			sobjectsRequest = RestRequest
 					.getRequestForDescribeGlobal(API_VERSION);
 			salesforceRestClient.sendAsync(sobjectsRequest, this);
@@ -159,7 +163,7 @@ public class SalesForceObjectChooser extends Activity implements
 				progressBar.setVisibility(View.INVISIBLE);
 				objectsSpinnerAdapter = new CommonSpinnerAdapter(
 						getLayoutInflater(), items);
-				// objectsSpinnerAdapter.changeOrdering(Constants.SORT_BY_LABEL);
+			 objectsSpinnerAdapter.changeOrdering(Constants.SORT_BY_LABEL);
 				objectSpinner.setAdapter(objectsSpinnerAdapter);
 				objectSpinner.setOnItemSelectedListener(this);
 
@@ -201,6 +205,10 @@ public class SalesForceObjectChooser extends Activity implements
 						recordItems.add(item);
 
 					}
+					
+					recordItems =	Constants.changeOrdering(Constants.SORT_BY_LABEL,recordItems);
+					
+					
 					progressBar.setVisibility(View.INVISIBLE);
 					adapter = new AdapterBaseClass(
 							SalesForceObjectChooser.this, recordItems);
@@ -221,9 +229,11 @@ public class SalesForceObjectChooser extends Activity implements
 		}
 
 		else if (request == attchReq) {
-			progressBar.setVisibility(View.INVISIBLE);
+			//progressBar.setVisibility(View.INVISIBLE);
+			dialog.dismiss();	
+
 			if (!response.isSuccess()) {
-				Toast.makeText(SalesForceObjectChooser.this, "Error",
+				Toast.makeText(SalesForceObjectChooser.this, response.toString(),
 						Toast.LENGTH_LONG).show();
 			} else {
 				Toast.makeText(SalesForceObjectChooser.this,
@@ -238,11 +248,44 @@ public class SalesForceObjectChooser extends Activity implements
 	@Override
 	public void onError(Exception exception) {
 		Log.v("Error",exception.getMessage().toString());
-		Toast.makeText(SalesForceObjectChooser.this, "Error", Toast.LENGTH_LONG)
+		exception.printStackTrace();
+		Toast.makeText(SalesForceObjectChooser.this, exception.getMessage().toString(), Toast.LENGTH_LONG)
 				.show();
 		progressBar.setVisibility(View.INVISIBLE);
 
 	}
+	
+	
+	
+	
+	public  ArrayList<CommonListItems> changeOrdering(String orderType,ArrayList<CommonListItems> items)
+	{
+		// Sort By Name
+		if(orderType.equalsIgnoreCase(Constants.SORT_BY_NAME))
+		{
+			Collections.sort(items, new CommonListComparator(CommonListComparator.COMPARE_BY_NAME));
+		}
+		// Sort By Date
+		else if(orderType.equalsIgnoreCase(""))
+		{
+			Collections.sort(items, new CommonListComparator(CommonListComparator.COMPARE_BY_SORT_DATA));
+		}
+		// Sort By id
+		else if (orderType.equalsIgnoreCase(Constants.SORT_BY_ID))
+		{
+			Collections.sort(items, new CommonListComparator(CommonListComparator.COMPARE_BY_ID));
+		}
+		// By default sort by Label
+		else
+		{
+			Collections.sort(items, new CommonListComparator(CommonListComparator.COMPARE_BY_LABEL));
+		}
+		//notifyDataSetChanged();
+		
+		return items;
+	}
+	
+	
 
 	@Override
 	public void onClick(View v) {
@@ -253,7 +296,10 @@ public class SalesForceObjectChooser extends Activity implements
 			}
 
 			else {
-				progressBar.setVisibility(View.VISIBLE);
+				//progressBar.setVisibility(View.VISIBLE);
+				dialog	 = ProgressDialog.show(SalesForceObjectChooser.this, "", 
+			            "Attaching files..", true);
+
 				sendToSalesForce(templateApp.getList(), parentIdList);
 			}
 		} else if (v == logoutButton) {
@@ -391,7 +437,9 @@ public class SalesForceObjectChooser extends Activity implements
 						salesforceRestClient.sendAsync(attchReq, this);
 
 					} catch (Exception e) {
-						progressBar.setVisibility(View.INVISIBLE);
+						
+						//progressBar.setVisibility(View.INVISIBLE);
+						dialog.dismiss();
 					}
 
 				}

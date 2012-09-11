@@ -27,8 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dip"
         android:layout_marginRight="5dip"
-        android:gravity="center_vertical"
-        android:text="Text "
+        android:gravity="center_vertical"      
         android:textColor="@color/common_text_color"
         android:textSize="@dimen/common_text_size" />
 
@@ -37,6 +36,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:layout_marginLeft="200dip"
+        android:visibility="invisible"
         android:background="@drawable/list_arrow"
         android:scaleType="fitCenter" />
 

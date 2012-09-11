@@ -14,6 +14,12 @@ public class CommonListItems
 	private Integer totalContent = null;
 	private Integer fieldLength = null;
 	private Boolean showListArrow = Boolean.TRUE;
+	public long size;
+	
+	public long getSize() {
+		return size;
+	}
+	
 	public String getId() {
 		return id;
 	}
@@ -49,6 +55,10 @@ public class CommonListItems
 	}
 	public Boolean getShowListArrow() {
 		return showListArrow;
+	}
+	
+	public void setSize(long size) {
+		this.size = size;
 	}
 	public void setId(String id) {
 		this.id = id;
