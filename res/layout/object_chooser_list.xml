@@ -13,10 +13,18 @@
         android:orientation="horizontal"
         android:padding="@dimen/normal_margin_padding" >
 
+        <Button
+            android:id="@+id/box_logout_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="3dp"
+            android:background="@drawable/logout_button_selector" />
+
         <TextView
             android:id="@+id/heading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
             android:text="Object List"
             android:textColor="@color/text_color_for_dark_background"
             android:textSize="@dimen/common_large_text_size" />
@@ -32,7 +40,7 @@
             android:id="@+id/save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="100dp"
+            android:layout_marginLeft="90dp"
             android:background="@drawable/save_button_selector" />
     </LinearLayout>
 
@@ -53,7 +61,6 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/header_layout"
-       
         android:padding="@dimen/normal_margin_padding" >
 
         <Spinner
@@ -78,9 +85,6 @@
         android:layout_height="wrap_content"
         android:cacheColorHint="#00000000"
         android:divider="#b5b5b5"
-   
         android:dividerHeight="1dp" />
-
-   
 
 </LinearLayout>

@@ -14,11 +14,18 @@
         android:orientation="horizontal"
         android:padding="@dimen/normal_margin_padding" >
 
+        
+          <Button
+            android:id="@+id/box_logout_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:background="@drawable/logout_button_selector" />
         <TextView
             android:id="@+id/heading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="8dp"
+            android:paddingLeft="10dp"
             android:text="BoxForce"
             android:textColor="@color/text_color_for_dark_background"
             android:textSize="@dimen/common_large_text_size" />
@@ -34,8 +41,8 @@
             android:id="@+id/Edit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="70dp"
-            android:background="@drawable/save_to_sf_button_selector" />
+            android:layout_marginLeft="100dp"
+            android:background="@drawable/edit_button_selector" />
     </LinearLayout>
     
    

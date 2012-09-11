@@ -47,6 +47,7 @@ import com.box.androidlib.DAO.BoxFile;
 import com.box.androidlib.DAO.BoxFolder;
 import com.box.androidlib.ResponseListeners.FileDownloadListener;
 import com.box.androidlib.ResponseListeners.GetAccountTreeListener;
+import com.box.androidlib.ResponseListeners.LogoutListener;
 import com.metacube.boxforce.R;
 
 public class Browse extends Activity implements OnClickListener,
@@ -60,8 +61,8 @@ public class Browse extends Activity implements OnClickListener,
 	String boxFilePath;
 	String encodedImage;
 	String mimeType;
-	Button editButton, saveToSF;
-	ImageView checkButtonImg;
+	Button editButton, saveToSF, logoutButton;
+	ImageView checkButtonImg, arrowImg;
 	ListView lv;
 	public static ArrayList<File> fList;
 	TemplateApp fileAttch;
@@ -69,7 +70,7 @@ public class Browse extends Activity implements OnClickListener,
 	ProgressBar progressBar;
 	boolean editMode = true;
 	LayoutInflater inflater;
-	//boolean previewMode = true;
+	// boolean previewMode = true;
 	public View[] rowView;
 
 	ArrayList<String> encodeImgList;
@@ -99,11 +100,15 @@ public class Browse extends Activity implements OnClickListener,
 
 		lv = (ListView) findViewById(R.id.file_list);
 		inflater = getLayoutInflater();
-		
-		/* * View footerView = getLayoutInflater().inflate(R.layout.footer, null,
-		 * false); lv.addFooterView(footerView);
+
+		/*
+		 *  * View footerView = getLayoutInflater().inflate(R.layout.footer,
+		 * null, false); lv.addFooterView(footerView);
 		 */
-		saveToSF =(Button) findViewById(R.id.saveTosf);
+		saveToSF = (Button) findViewById(R.id.saveTosf);
+		logoutButton = (Button) findViewById(R.id.box_logout_button);
+		logoutButton.setOnClickListener(Browse.this);
+
 		editButton = (Button) findViewById(R.id.Edit);
 		editButton.setOnClickListener(Browse.this);
 		saveToSF.setOnClickListener(Browse.this);
@@ -114,17 +119,17 @@ public class Browse extends Activity implements OnClickListener,
 	@Override
 	protected void onResume() {
 		super.onResume();
-
+		editMode = true;
 		fileAttch = ((TemplateApp) getApplicationContext());
 		fList = new ArrayList<File>();
 
 		items = new TreeListItem[0];
-		saveToSF =(Button) findViewById(R.id.saveTosf);
+		saveToSF = (Button) findViewById(R.id.saveTosf);
 
 		saveToSF.setOnClickListener(Browse.this);
 		editButton = (Button) findViewById(R.id.Edit);
 		editButton.setOnClickListener(this);
-		adapter = new MyArrayAdapter(this,false, items);
+		adapter = new MyArrayAdapter(this, false, items);
 		lv.setOnItemClickListener(this);
 		lv.setAdapter(adapter);
 		refresh();
@@ -170,7 +175,7 @@ public class Browse extends Activity implements OnClickListener,
 							items[i] = item;
 							i++;
 						}
-						rowView  = new View[items.length];
+						rowView = new View[items.length];
 
 						adapter.notifyDataSetChanged();
 
@@ -203,8 +208,7 @@ public class Browse extends Activity implements OnClickListener,
 				items[position].checked = true;
 				checkButtonImg.setBackgroundResource(R.drawable.button_checked);
 			}
-		} 
-		else {
+		} else {
 			progressBar.setVisibility(View.VISIBLE);
 			File file = downloadfile(items[position]);
 			progressBar.setVisibility(View.INVISIBLE);
@@ -232,52 +236,45 @@ public class Browse extends Activity implements OnClickListener,
 	private class MyArrayAdapter extends BaseAdapter {
 
 		private Context context;
-		int listItemResourceId;
-		// TreeListItem[] objects;
+
 		TextView title;
-		//ImageView[] checkImg;
+
 		boolean isCheckBoxShow;
-		
-		public MyArrayAdapter(Context contextt,boolean isCheckBoxShow ,TreeListItem[] objects) {
-			// super(contextt, objects);
-			// this.objects =objects;
-			// /this.listItemResourceId = listItemResourceId;
-			this.isCheckBoxShow =isCheckBoxShow;
+
+		public MyArrayAdapter(Context contextt, boolean isCheckBoxShow,
+				TreeListItem[] objects) {
+
+			this.isCheckBoxShow = isCheckBoxShow;
 			context = contextt;
-			/*checkImg = new ImageView[items.length];
-			rowView  = new View[items.length];*/
-			//int lent= items.length;
+
 		}
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 
 			View row = convertView;
-			if(convertView!= null)
-				Browse.this.rowView[position] =convertView;
+			if (convertView != null)
+				Browse.this.rowView[position] = convertView;
 
 			LayoutInflater inflater = ((Activity) context).getLayoutInflater();
 			row = inflater.inflate(R.layout.list_row, null);
 
 			title = (TextView) row.findViewById(R.id.title);
 
-			// title.setText(items[position].name);
-
 			title.append(items[position].name);
 			title.append("\n");
 			title.append(fileSize(items[position].size));
-			
-			checkButtonImg =(ImageView) row.findViewById(R.id.list_item_checkbox_image);
-			
-			if(isCheckBoxShow)	
-			{
+
+			checkButtonImg = (ImageView) row
+					.findViewById(R.id.list_item_checkbox_image);
+			arrowImg = (ImageView) row.findViewById(R.id.arrow_img);
+
+			if (isCheckBoxShow) {
 				checkButtonImg.setVisibility(View.VISIBLE);
-				row.findViewById(R.id.arrow_img).setVisibility(View.INVISIBLE);
-			}
-			else 
-			{
-				checkButtonImg.setVisibility(View.INVISIBLE);	
-				row.findViewById(R.id.arrow_img).setVisibility(View.VISIBLE);
+				arrowImg.setVisibility(View.INVISIBLE);
+			} else {
+				checkButtonImg.setVisibility(View.INVISIBLE);
+				arrowImg.setVisibility(View.VISIBLE);
 			}
 
 			return row;
@@ -299,16 +296,7 @@ public class Browse extends Activity implements OnClickListener,
 			// TODO Auto-generated method stub
 			return 0;
 		}
-		
-		
-		public View[] getRowView() {
-			// TODO Auto-generated method stub
-			return rowView;
-		}
-		
-		
-		
-		
+
 	}
 
 	public static String getMimeType(String url) {
@@ -326,31 +314,30 @@ public class Browse extends Activity implements OnClickListener,
 		if (v == editButton) {
 
 			if (editMode) {
-			
-				
+
 				editMode = false;
-				adapter = new MyArrayAdapter(this,true, items);
+				adapter = new MyArrayAdapter(this, true, items);
 				lv.setOnItemClickListener(this);
 				lv.setAdapter(adapter);
-				
+
 			} else {
-				
-				adapter = new MyArrayAdapter(this,false, items);
+
+				adapter = new MyArrayAdapter(this, false, items);
 				lv.setOnItemClickListener(this);
 				lv.setAdapter(adapter);
 				editMode = true;
-				
+
 			}
 		}
 
 		else if (v == saveToSF) {
 			if (!editMode) {
-				
 
 				if (items.length == 0) {
-					Toast.makeText(Browse.this, "Select Files", 1).show();
+					Toast.makeText(Browse.this, "Select Files",
+							Toast.LENGTH_LONG).show();
 				} else {
-					
+
 					int fileCount = items.length;
 					progressBar.setVisibility(View.VISIBLE);
 					for (int position = 0; position < fileCount; position++) {
@@ -364,19 +351,60 @@ public class Browse extends Activity implements OnClickListener,
 							SalesForceObjectChooser.class);
 					startActivity(intent);
 				}
+			} else {
+				Toast.makeText(Browse.this, "Select any file",
+						Toast.LENGTH_LONG).show();
 			}
+		}
+
+		else if (v == logoutButton) {
+			Box.getInstance(Constants.API_KEY).logout(authToken,
+					new LogoutListener() {
+
+						@Override
+						public void onIOException(IOException e) {
+							Toast.makeText(getApplicationContext(),
+									"Logout failed - " + e.getMessage(),
+									Toast.LENGTH_LONG).show();
+						}
+
+						@Override
+						public void onComplete(String status) {
+							if (status.equals(LogoutListener.STATUS_LOGOUT_OK)) {
+								// Delete stored auth token and send user back
+								// to
+								// splash page
+								final SharedPreferences prefs = getSharedPreferences(
+										Constants.PREFS_FILE_NAME, 0);
+								final SharedPreferences.Editor editor = prefs
+										.edit();
+								editor.remove(Constants.PREFS_KEY_AUTH_TOKEN);
+								editor.commit();
+								Toast.makeText(getApplicationContext(),
+										"Logged out", Toast.LENGTH_LONG).show();
+								Intent i = new Intent(Browse.this,
+										MainActivity.class);
+								startActivity(i);
+								finish();
+							} else {
+								Toast.makeText(getApplicationContext(),
+										"Logout failed - " + status,
+										Toast.LENGTH_LONG).show();
+							}
+						}
+					});
+
 		}
 
 	}
 
 	private File downloadfile(TreeListItem fileItem) {
-	
+
 		final Box box = Box.getInstance(Constants.API_KEY);
 		final java.io.File destinationFile = new java.io.File(
 				Environment.getExternalStorageDirectory() + "/"
 						+ URLEncoder.encode(fileItem.name));
-		
-		
+
 		/*
 		 * final ProgressDialog downloadDialog = new
 		 * ProgressDialog(Browse.this); downloadDialog.setMessage("Downloading "
@@ -403,7 +431,6 @@ public class Browse extends Activity implements OnClickListener,
 							fList.add(destinationFile);
 
 							fileAttch.setList(fList);
-						
 
 							/*
 							 * Toast.makeText( getApplicationContext(),
@@ -452,5 +479,8 @@ public class Browse extends Activity implements OnClickListener,
 		return String.valueOf(bytes / (1024.0 * 1024.0 * 1024.0)) + "GB";
 
 	}
+
+
+
 
 }
