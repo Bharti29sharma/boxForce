@@ -71,9 +71,8 @@ public class Browse extends Activity implements OnClickListener,
 	View footer;
 	ProgressBar progressBar;
 	boolean editMode = true;
-	//LayoutInflater inflater;
-	// boolean previewMode = true;
-	//public View[] rowView;
+	
+	//File fileForPreview;
 	int REQUEST_CODE=1;
 	ArrayList<String> encodeImgList;
 
@@ -211,16 +210,16 @@ public class Browse extends Activity implements OnClickListener,
 		}
 		else {
 			progressBar.setVisibility(View.VISIBLE);
-			File file = downloadfile(items.get(position));
-			progressBar.setVisibility(View.INVISIBLE);
-			mimeType = getMimeType(file.getPath());
+			 downloadfile(items.get(position),true);
+			/*progressBar.setVisibility(View.INVISIBLE);
+			mimeType = getMimeType(fileForPreview.getPath());
 			if(mimeType!=null)
 			{
 
 				try {
 					Intent intent = new Intent();
 					intent.setAction(android.content.Intent.ACTION_VIEW);
-					intent.setDataAndType(Uri.fromFile(file), mimeType);
+					intent.setDataAndType(Uri.fromFile(fileForPreview), mimeType);
 					startActivity(intent);
 				} catch (Exception e) {			
 					e.printStackTrace();
@@ -233,21 +232,13 @@ public class Browse extends Activity implements OnClickListener,
 			{
 				Toast.makeText(Browse.this, "File Can't Open", 1).show();
 			}
-
+*/
 
 		}
 
 	}
 
-	/*private class TreeListItem {
-
-		public long id;
-		public long size;
-		public String name;
-		public boolean checked;
-		@SuppressWarnings("unused")
-		public BoxFolder folder;
-	}*/
+	
 
 	private class MyArrayAdapter extends BaseAdapter {
 
@@ -285,10 +276,12 @@ public class Browse extends Activity implements OnClickListener,
 		//	arrowImg = (ImageView) row.findViewById(R.id.arrow_img);
 
 			if (isCheckBoxShow) {
+				items.get(position).setIsChecked(false);
 				checkButtonImg.setVisibility(View.VISIBLE);
 				//arrowImg.setVisibility(View.INVISIBLE);
 			} else {
 				checkButtonImg.setVisibility(View.INVISIBLE);
+				items.get(position).setIsChecked(false);
 				//arrowImg.setVisibility(View.VISIBLE);
 			}
 
@@ -348,7 +341,7 @@ public class Browse extends Activity implements OnClickListener,
 		else if (v == saveToSF) {
 			if (!editMode) {
 
-				if (items.size() == 0) {
+				if (checkedItems(items) == 0) {
 					Toast.makeText(Browse.this, "Select Files",
 							Toast.LENGTH_LONG).show();
 				} else {
@@ -357,7 +350,7 @@ public class Browse extends Activity implements OnClickListener,
 					progressBar.setVisibility(View.VISIBLE);
 					for (int position = 0; position < fileCount; position++) {
 						if (items.get(position).getIsChecked()) {
-							downloadfile(items.get(position));
+							downloadfile(items.get(position),false);
 						}
 					}
 					progressBar.setVisibility(View.INVISIBLE);
@@ -413,27 +406,14 @@ public class Browse extends Activity implements OnClickListener,
 
 	}
 
-	private File downloadfile(CommonListItems fileItem) {
+	private void downloadfile(CommonListItems fileItem,final boolean isPreview ) {
 
 		final Box box = Box.getInstance(Constants.API_KEY);
 		final java.io.File destinationFile = new java.io.File(
 				Environment.getExternalStorageDirectory() + "/"
 						+ URLEncoder.encode(fileItem.getName()));
 
-		/*
-		 * final ProgressDialog downloadDialog = new
-		 * ProgressDialog(Browse.this); downloadDialog.setMessage("Downloading "
-		 * + items[position].name);
-		 * downloadDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-		 * downloadDialog.setMax((int) items[position].file.getSize());
-		 * downloadDialog.setCancelable(true); downloadDialog.show();
-		 */
-
-		/*
-		 * Toast.makeText(getApplicationContext(),
-		 * "Click BACK to cancel the download.", Toast.LENGTH_SHORT) .show();
-		 */
-
+	
 		box.download(authToken,  Long.parseLong(fileItem.getId()), destinationFile, null,
 				new FileDownloadListener() {
 
@@ -442,10 +422,41 @@ public class Browse extends Activity implements OnClickListener,
 						// downloadDialog.dismiss();
 						if (status
 								.equals(FileDownloadListener.STATUS_DOWNLOAD_OK)) {
+							
+							if(!isPreview)
+							{
+								fList.add(destinationFile);
 
-							fList.add(destinationFile);
+								fileAttch.setList(fList);
+							}
+							else
+							{
+								progressBar.setVisibility(View.INVISIBLE);
+								mimeType = getMimeType(destinationFile.getPath());
+								if(mimeType!=null)
+								{
 
-							fileAttch.setList(fList);
+									try {
+										Intent intent = new Intent();
+										intent.setAction(android.content.Intent.ACTION_VIEW);
+										intent.setDataAndType(Uri.fromFile(destinationFile), mimeType);
+										startActivity(intent);
+									} catch (Exception e) {			
+										e.printStackTrace();
+										Toast.makeText(Browse.this, "File Can't Open", 1).show();
+										
+									}
+									
+								}
+								else
+								{
+									Toast.makeText(Browse.this, "File Can't Open", 1).show();
+									progressBar.setVisibility(View.INVISIBLE);
+								}
+
+							
+							
+							}
 
 							/*
 							 * Toast.makeText( getApplicationContext(),
@@ -477,7 +488,6 @@ public class Browse extends Activity implements OnClickListener,
 					}
 				});
 
-		return destinationFile;
 
 	}
 
@@ -509,6 +519,20 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 }
 	
 	
+private int checkedItems(ArrayList<CommonListItems> recordItem)
+{
+	 int j=0;
+	 for(int i=0 ; i<recordItem.size(); i++)
+	 {
+		 
+		 if(recordItem.get(i).getIsChecked())
+		 {
+			 j=j+1;
+		 }
 
+	 }
+		
+	 return j;
+}
 
 }

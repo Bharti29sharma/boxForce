@@ -179,7 +179,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
 			Intent intent = new Intent(MainActivity.this, Authentication.class);
 			startActivity(intent);
-			finish();
+			//finish();
 
 		}
 		/*if (v == homeButton) {
@@ -246,7 +246,7 @@ public class MainActivity extends Activity implements OnClickListener {
 						
 						Intent intent = new Intent(MainActivity.this, Browse.class);
 						startActivity(intent);
-						finish();
+						//finish();
 						
 						
 						

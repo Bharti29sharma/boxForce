@@ -290,7 +290,7 @@ public class SalesForceObjectChooser extends Activity implements
 	@Override
 	public void onClick(View v) {
 		if (v == save) {
-			if (parentIdList.size() == 0) {
+			if (checkedItems(recordItems) == 0) {
 				Toast.makeText(SalesForceObjectChooser.this,
 						"Select Any Record", Toast.LENGTH_LONG).show();
 			}
@@ -519,4 +519,20 @@ public class SalesForceObjectChooser extends Activity implements
 
 	}
 
-}
+ private int checkedItems(ArrayList<CommonListItems> recordItem)
+ {
+	 int j=0;
+	 for(int i=0 ; i<recordItem.size(); i++)
+	 {
+		 
+		 if(recordItem.get(i).getIsChecked())
+		 {
+			 j=j+1;
+		 }
+
+	 }
+		
+	 return j;
+ }
+ }
+
