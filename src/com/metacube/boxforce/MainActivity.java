@@ -27,32 +27,15 @@
 package com.metacube.boxforce;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.AlertDialog.Builder;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Base64;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.webkit.CookieSyncManager;
-import android.webkit.MimeTypeMap;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.TextView;
@@ -64,15 +47,10 @@ import com.box.androidlib.ResponseListeners.GetAccountInfoListener;
 import com.metacube.boxforce.R;
 import com.salesforce.androidsdk.app.ForceApp;
 import com.salesforce.androidsdk.rest.ClientManager;
-import com.salesforce.androidsdk.rest.RestRequest;
-import com.salesforce.androidsdk.rest.RestResponse;
 import com.salesforce.androidsdk.rest.ClientManager.LoginOptions;
 import com.salesforce.androidsdk.rest.ClientManager.RestClientCallback;
-import com.salesforce.androidsdk.rest.RestClient.AsyncRequestCallback;
 import com.salesforce.androidsdk.rest.RestClient;
 import com.salesforce.androidsdk.security.PasscodeManager;
-import com.salesforce.androidsdk.util.EventsObservable;
-import com.salesforce.androidsdk.util.EventsObservable.EventType;
 
 /**
  * Main activity
@@ -80,9 +58,7 @@ import com.salesforce.androidsdk.util.EventsObservable.EventType;
 public class MainActivity extends Activity implements OnClickListener {
 
 	private PasscodeManager passcodeManager;
-	private TextView statusText;
-	private Button homeButton;
-	private Button authenticateButton,loginButton;
+	private Button loginButton;
 
 	String encodedImage = "";
 	File fileS;
@@ -135,13 +111,7 @@ public class MainActivity extends Activity implements OnClickListener {
 							}
 							Constants.client = client;
 
-							/*setContentView(R.layout.splash);
-							statusText = (TextView) findViewById(R.id.statusText);
-							homeButton = (Button) findViewById(R.id.homeButton);
-							authenticateButton = (Button) findViewById(R.id.authenticateButton);
-							homeButton.setOnClickListener(MainActivity.this);
-							authenticateButton
-									.setOnClickListener(MainActivity.this);*/
+						
 
 							BoxAuthenticationFunctionality();
 
@@ -182,28 +152,11 @@ public class MainActivity extends Activity implements OnClickListener {
 			//finish();
 
 		}
-		/*if (v == homeButton) {
-			Intent intent = new Intent(MainActivity.this, Browse.class);
-			startActivity(intent);
-			finish();
-		}*/
+		
 
 	}
 
 	
-	private class Item {
-		public String file;
-
-		public Item(String file, Integer icon) {
-			this.file = file;
-		}
-
-		@Override
-		public String toString() {
-			return file;
-		}
-	}
-
 	private void BoxAuthenticationFunctionality() {
 		
 		if (Constants.API_KEY == null) {
@@ -215,10 +168,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			return;
 		}
 
-		/*statusText.setText(getResources().getString(
-				R.string.checking_login_status));
-		homeButton.setVisibility(View.GONE);
-		authenticateButton.setVisibility(View.GONE);*/
+		
 
 		final SharedPreferences prefs = getSharedPreferences(
 				Constants.PREFS_FILE_NAME, 0);
@@ -246,21 +196,12 @@ public class MainActivity extends Activity implements OnClickListener {
 						
 						Intent intent = new Intent(MainActivity.this, Browse.class);
 						startActivity(intent);
-						//finish();
+						finish();
 						
 						
-						
-						/*statusText.setText("Logged in as\n"
-								+ boxUser.getEmail());
-						homeButton.setVisibility(View.VISIBLE);
-						authenticateButton
-								.setText("Log in as a different user");
-						authenticateButton.setVisibility(View.VISIBLE);*/
 						
 					} else {
-						// Could not get user info. It's possible the auth token
-						// was no longer valid. Check the status code that was
-						// returned.
+						
 						onNotLoggedIn();
 					}
 				}
@@ -281,16 +222,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		 loginButton = (Button) findViewById(R.id.loginButton);
 		 loginButton.setOnClickListener(MainActivity.this);
 		
-		/*Intent intent = new Intent(MainActivity.this, Splash.class);
-		startActivity(intent);*/
-		/*
-		Intent intent = new Intent(MainActivity.this, Authentication.class);
-		startActivity(intent);*/
-
-		/*statusText.setText("You are not logged in");
-		homeButton.setVisibility(View.GONE);
-		authenticateButton.setText("Log in");
-		authenticateButton.setVisibility(View.VISIBLE);*/
+		
 	}
 
 }

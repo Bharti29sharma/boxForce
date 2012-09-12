@@ -64,7 +64,7 @@ public class Browse extends Activity implements OnClickListener,
 	String encodedImage;
 	String mimeType;
 	Button editButton, saveToSF, logoutButton;
-	ImageView checkButtonImg;
+	ImageView checkButtonImg,arrowImg;
 	ListView lv;
 	public static ArrayList<File> fList;
 	TemplateApp fileAttch;
@@ -152,10 +152,7 @@ public class Browse extends Activity implements OnClickListener,
 							return;
 						}
 
-						// progressBar.setVisibility(View.VISIBLE);
-
-					/*	items = new TreeListItem[boxFolder.getFilesInFolder()
-								.size()];*/
+					
 
 						int i = 0;
 
@@ -174,8 +171,7 @@ public class Browse extends Activity implements OnClickListener,
 						}
 						
 						items =	Constants.changeOrdering(Constants.SORT_BY_NAME,items);
-						//rowView = new View[items.size()];
-
+						
 						adapter.notifyDataSetChanged();
 
 						progressBar.setVisibility(View.INVISIBLE);
@@ -211,28 +207,8 @@ public class Browse extends Activity implements OnClickListener,
 		else {
 			progressBar.setVisibility(View.VISIBLE);
 			 downloadfile(items.get(position),true);
-			/*progressBar.setVisibility(View.INVISIBLE);
-			mimeType = getMimeType(fileForPreview.getPath());
-			if(mimeType!=null)
-			{
+		
 
-				try {
-					Intent intent = new Intent();
-					intent.setAction(android.content.Intent.ACTION_VIEW);
-					intent.setDataAndType(Uri.fromFile(fileForPreview), mimeType);
-					startActivity(intent);
-				} catch (Exception e) {			
-					e.printStackTrace();
-					Toast.makeText(Browse.this, "File Can't Open", 1).show();
-					
-				}
-				
-			}
-			else
-			{
-				Toast.makeText(Browse.this, "File Can't Open", 1).show();
-			}
-*/
 
 		}
 
@@ -273,16 +249,16 @@ public class Browse extends Activity implements OnClickListener,
 
 			checkButtonImg = (ImageView) row
 					.findViewById(R.id.list_item_checkbox_image);
-		//	arrowImg = (ImageView) row.findViewById(R.id.arrow_img);
+			arrowImg = (ImageView) row.findViewById(R.id.arrow_img);
 
 			if (isCheckBoxShow) {
 				items.get(position).setIsChecked(false);
 				checkButtonImg.setVisibility(View.VISIBLE);
-				//arrowImg.setVisibility(View.INVISIBLE);
+				arrowImg.setVisibility(View.INVISIBLE);
 			} else {
 				checkButtonImg.setVisibility(View.INVISIBLE);
 				items.get(position).setIsChecked(false);
-				//arrowImg.setVisibility(View.VISIBLE);
+				arrowImg.setVisibility(View.VISIBLE);
 			}
 
 			return row;
@@ -458,12 +434,7 @@ public class Browse extends Activity implements OnClickListener,
 							
 							}
 
-							/*
-							 * Toast.makeText( getApplicationContext(),
-							 * "File downloaded to " +
-							 * destinationFile.getAbsolutePath(),
-							 * Toast.LENGTH_LONG).show();
-							 */
+							
 						} else if (status
 								.equals(FileDownloadListener.STATUS_DOWNLOAD_CANCELLED)) {
 							/*

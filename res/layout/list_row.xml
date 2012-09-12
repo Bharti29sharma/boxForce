@@ -35,9 +35,10 @@
         android:id="@+id/arrow_img"
         android:layout_width="16dp"
         android:layout_height="16dp"
-        android:layout_marginLeft="200dip"
-        android:visibility="invisible"
+        android:layout_marginLeft="200dip"      
         android:background="@drawable/list_arrow"
         android:scaleType="fitCenter" />
+    
+   <!--  android:visibility="invisible" -->
 
 </LinearLayout>
