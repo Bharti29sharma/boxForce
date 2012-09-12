@@ -121,7 +121,7 @@ public class SalesForceObjectChooser extends Activity implements
 
 		if (salesforceRestClient != null) {
 			progressBar.setVisibility(View.VISIBLE);
-			parentIdList = new ArrayList<String>();
+			//parentIdList = new ArrayList<String>();
 			try {
 				String soql = "select id, name from " + item.getName();
 				recordsRequest = RestRequest.getRequestForQuery(API_VERSION,
@@ -198,7 +198,7 @@ public class SalesForceObjectChooser extends Activity implements
 						CommonListItems item = new CommonListItems();
 						JSONObject field = fields.getJSONObject(i);
 
-						parentIdList.add(field.optString("Id"));
+						//parentIdList.add(field.optString("Id"));
 						item.setId(field.optString("Id"));
 						item.setLabel(field.optString("Name"));
 						item.setIsChecked(false);
@@ -385,7 +385,7 @@ public class SalesForceObjectChooser extends Activity implements
 	}
 
 	private void sendToSalesForce(ArrayList<File> filesList,
-			ArrayList<String> parentIDList) {
+			ArrayList<String> parentIDLst) {
 
 		int count = filesList.size();
 		String encodedImage = null;
@@ -419,11 +419,11 @@ public class SalesForceObjectChooser extends Activity implements
 					e.printStackTrace();
 				}
 
-				for (int parentIndex = 0; parentIndex < parentIDList.size(); parentIndex++) {
+				for (int parentIndex = 0; parentIndex < parentIDLst.size(); parentIndex++) {
 
 					String objectType = "Attachment";
 					Map<String, Object> fields = new HashMap<String, Object>();
-					fields.put("ParentID", parentIDList.get(parentIndex));
+					fields.put("ParentID", parentIDLst.get(parentIndex));
 					fields.put("Body", encodedImage);
 					fields.put("Name", boxFileName);
 					// fields.put("ContentType", "image/jpeg");
@@ -522,11 +522,13 @@ public class SalesForceObjectChooser extends Activity implements
  private int checkedItems(ArrayList<CommonListItems> recordItem)
  {
 	 int j=0;
+	 parentIdList = new ArrayList<String>();
 	 for(int i=0 ; i<recordItem.size(); i++)
 	 {
 		 
 		 if(recordItem.get(i).getIsChecked())
 		 {
+			 parentIdList.add(recordItem.get(i).getId());
 			 j=j+1;
 		 }
 

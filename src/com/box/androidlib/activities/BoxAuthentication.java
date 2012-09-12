@@ -14,6 +14,7 @@ package com.box.androidlib.activities;
 import java.io.IOException;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
@@ -22,12 +23,14 @@ import android.os.Handler;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ProgressBar;
 
 import com.box.androidlib.Box;
 import com.box.androidlib.DAO.User;
 import com.box.androidlib.ResponseListeners.GetAuthTokenListener;
 import com.box.androidlib.ResponseListeners.GetTicketListener;
 import com.box.androidlib.Utils.BoxConstants;
+import com.metacube.boxforce.Authentication;
 import com.metacube.boxforce.R;
 
 /**
@@ -72,6 +75,7 @@ public class BoxAuthentication extends Activity {
      * Delay in milliseconds between each getAuthToken retry.
      */
     private static final int GET_AUTH_TOKEN_INTERVAL = 500;
+  
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -94,7 +98,10 @@ public class BoxAuthentication extends Activity {
             @Override
             public void onComplete(final String ticket, final String status) {
                 if (status.equals("get_ticket_ok")) {
+                	
                     loadLoginWebview(ticket);
+                    
+                   
                 }
                 else {
                     onGetTicketFail();
@@ -117,10 +124,12 @@ public class BoxAuthentication extends Activity {
     private void loadLoginWebview(final String ticket) {
         // Load the login webpage. Note how the ticket must be appended to the
         // login url.
+    	
         String loginUrl = BoxConstants.LOGIN_URL + ticket;
         mLoginWebView = (WebView) findViewById(R.id.loginWebView);
         mLoginWebView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
         mLoginWebView.getSettings().setJavaScriptEnabled(true);
+   
         mLoginWebView.setWebViewClient(new WebViewClient() {
 
             @Override
@@ -128,13 +137,17 @@ public class BoxAuthentication extends Activity {
                 // Listen for page loads and execute Box.getAuthToken() after
                 // each one to see if the user has successfully logged in.
                 getAuthToken(ticket, 0);
+              
             }
 
             @Override
             public boolean shouldOverrideUrlLoading(final WebView view, final String url) {
                 if (url != null && url.startsWith("market://")) {
                     try {
+                    	
                         view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                       
+                        
                         return true;
                     }
                     catch (ActivityNotFoundException e) {

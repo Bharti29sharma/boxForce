@@ -1,6 +1,7 @@
 package com.metacube.boxforce;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import com.box.androidlib.activities.BoxAuthentication;
 public class Authentication extends Activity {
 
     private static final int AUTH_REQUEST_CODE = 100;
+  
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -30,6 +32,8 @@ public class Authentication extends Activity {
         // source code in com.box.androidlib.activities.BoxAuthentication for
         // guidance, as well as the API docs for authentication:
         // http://developers.box.net/w/page/12923915/ApiAuthentication
+        
+    		
         Intent intent = new Intent(this, BoxAuthentication.class);
         intent.putExtra("API_KEY", Constants.API_KEY); // API_KEY is required
         startActivityForResult(intent, AUTH_REQUEST_CODE);
@@ -39,6 +43,7 @@ public class Authentication extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == AUTH_REQUEST_CODE) {
             if (resultCode == BoxAuthentication.AUTH_RESULT_SUCCESS) {
+            
                 // Store auth key in shared preferences.
                 // BoxAuthentication activity will set the auth key into the
                 // resulting intent extras, keyed as AUTH_TOKEN

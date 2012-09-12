@@ -55,8 +55,8 @@ public class Browse extends Activity implements OnClickListener,
 		OnItemClickListener {
 
 	private MyArrayAdapter adapter;
-	//private TreeListItem[] items;
-	 ArrayList<CommonListItems> items;
+	// private TreeListItem[] items;
+	ArrayList<CommonListItems> items;
 	private String authToken;
 	private long folderId;
 	String boxFileName;
@@ -64,16 +64,16 @@ public class Browse extends Activity implements OnClickListener,
 	String encodedImage;
 	String mimeType;
 	Button editButton, saveToSF, logoutButton;
-	ImageView checkButtonImg,arrowImg;
+	ImageView checkButtonImg;
 	ListView lv;
 	public static ArrayList<File> fList;
 	TemplateApp fileAttch;
 	View footer;
 	ProgressBar progressBar;
 	boolean editMode = true;
-	
-	//File fileForPreview;
-	int REQUEST_CODE=1;
+
+	// File fileForPreview;
+	int REQUEST_CODE = 1;
 	ArrayList<String> encodeImgList;
 
 	@Override
@@ -100,7 +100,7 @@ public class Browse extends Activity implements OnClickListener,
 		}
 
 		lv = (ListView) findViewById(R.id.file_list);
-		
+
 		saveToSF = (Button) findViewById(R.id.saveTosf);
 		logoutButton = (Button) findViewById(R.id.box_logout_button);
 		logoutButton.setOnClickListener(Browse.this);
@@ -119,8 +119,7 @@ public class Browse extends Activity implements OnClickListener,
 		fileAttch = ((TemplateApp) getApplicationContext());
 		fList = new ArrayList<File>();
 
-		//items = new TreeListItem[0];
-		items =	new  ArrayList<CommonListItems>();
+		items = new ArrayList<CommonListItems>();
 		saveToSF = (Button) findViewById(R.id.saveTosf);
 
 		saveToSF.setOnClickListener(Browse.this);
@@ -152,8 +151,6 @@ public class Browse extends Activity implements OnClickListener,
 							return;
 						}
 
-					
-
 						int i = 0;
 
 						Iterator<? extends BoxFile> filesIterator = boxFolder
@@ -163,15 +160,17 @@ public class Browse extends Activity implements OnClickListener,
 							CommonListItems item = new CommonListItems();
 							item.setId(String.valueOf(boxFile.getId()));
 							item.setName(boxFile.getFileName());
-							item.setSize(boxFile.getSize()) ;
+							item.setSize(boxFile.getSize());
 							boxFile.getUpdated();
 							item.setIsChecked(false);
+							item.setShowListArrow(true);
 							items.add(item);
 							i++;
 						}
-						
-						items =	Constants.changeOrdering(Constants.SORT_BY_NAME,items);
-						
+
+						items = Constants.changeOrdering(
+								Constants.SORT_BY_NAME, items);
+
 						adapter.notifyDataSetChanged();
 
 						progressBar.setVisibility(View.INVISIBLE);
@@ -203,18 +202,13 @@ public class Browse extends Activity implements OnClickListener,
 				items.get(position).setIsChecked(true);
 				checkButtonImg.setBackgroundResource(R.drawable.button_checked);
 			}
-		}
-		else {
+		} else {
 			progressBar.setVisibility(View.VISIBLE);
-			 downloadfile(items.get(position),true);
-		
-
+			downloadfile(items.get(position), true);
 
 		}
 
 	}
-
-	
 
 	private class MyArrayAdapter extends BaseAdapter {
 
@@ -236,7 +230,7 @@ public class Browse extends Activity implements OnClickListener,
 		public View getView(int position, View convertView, ViewGroup parent) {
 
 			View row = convertView;
-			
+			ImageView arrowImg;
 
 			LayoutInflater inflater = ((Activity) context).getLayoutInflater();
 			row = inflater.inflate(R.layout.list_row, null);
@@ -326,7 +320,7 @@ public class Browse extends Activity implements OnClickListener,
 					progressBar.setVisibility(View.VISIBLE);
 					for (int position = 0; position < fileCount; position++) {
 						if (items.get(position).getIsChecked()) {
-							downloadfile(items.get(position),false);
+							downloadfile(items.get(position), false);
 						}
 					}
 					progressBar.setVisibility(View.INVISIBLE);
@@ -382,59 +376,54 @@ public class Browse extends Activity implements OnClickListener,
 
 	}
 
-	private void downloadfile(CommonListItems fileItem,final boolean isPreview ) {
+	private void downloadfile(CommonListItems fileItem, final boolean isPreview) {
 
 		final Box box = Box.getInstance(Constants.API_KEY);
 		final java.io.File destinationFile = new java.io.File(
 				Environment.getExternalStorageDirectory() + "/"
 						+ URLEncoder.encode(fileItem.getName()));
 
-	
-		box.download(authToken,  Long.parseLong(fileItem.getId()), destinationFile, null,
-				new FileDownloadListener() {
+		box.download(authToken, Long.parseLong(fileItem.getId()),
+				destinationFile, null, new FileDownloadListener() {
 
 					@Override
 					public void onComplete(final String status) {
 						// downloadDialog.dismiss();
 						if (status
 								.equals(FileDownloadListener.STATUS_DOWNLOAD_OK)) {
-							
-							if(!isPreview)
-							{
+
+							if (!isPreview) {
 								fList.add(destinationFile);
 
 								fileAttch.setList(fList);
-							}
-							else
-							{
+							} else {
 								progressBar.setVisibility(View.INVISIBLE);
-								mimeType = getMimeType(destinationFile.getPath());
-								if(mimeType!=null)
-								{
+								mimeType = getMimeType(destinationFile
+										.getPath());
+								if (mimeType != null) {
 
 									try {
 										Intent intent = new Intent();
 										intent.setAction(android.content.Intent.ACTION_VIEW);
-										intent.setDataAndType(Uri.fromFile(destinationFile), mimeType);
+										intent.setDataAndType(
+												Uri.fromFile(destinationFile),
+												mimeType);
 										startActivity(intent);
-									} catch (Exception e) {			
+									} catch (Exception e) {
 										e.printStackTrace();
-										Toast.makeText(Browse.this, "File Can't Open", 1).show();
-										
+										Toast.makeText(Browse.this,
+												"File Can't Open", 1).show();
+
 									}
-									
-								}
-								else
-								{
-									Toast.makeText(Browse.this, "File Can't Open", 1).show();
+
+								} else {
+									Toast.makeText(Browse.this,
+											"File Can't Open", 1).show();
 									progressBar.setVisibility(View.INVISIBLE);
 								}
 
-							
-							
 							}
 
-							
 						} else if (status
 								.equals(FileDownloadListener.STATUS_DOWNLOAD_CANCELLED)) {
 							/*
@@ -459,7 +448,6 @@ public class Browse extends Activity implements OnClickListener,
 					}
 				});
 
-
 	}
 
 	String fileSize(long bytes) {
@@ -470,40 +458,40 @@ public class Browse extends Activity implements OnClickListener,
 			return String.valueOf(bytes / 1024) + "KB";
 
 		else if (bytes >= 1048576 && bytes <= 1073741823)
-			return String.valueOf(bytes / (1024.0 * 1024.0)) + "MB";
+		{
+			String  num = String.format("%.2f",  bytes / (1024.0 * 1024.0) );
+					
+		
+			return String.valueOf(num) + "MB";
+			
+		}
+			
 
 		return String.valueOf(bytes / (1024.0 * 1024.0 * 1024.0)) + "GB";
 
 	}
 
-	
-@Override
-protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-	// TODO Auto-generated method stub
-	super.onActivityResult(requestCode, resultCode, data);
-	
-	
-	if(requestCode==REQUEST_CODE)
-	{
-		
-	}
-}
-	
-	
-private int checkedItems(ArrayList<CommonListItems> recordItem)
-{
-	 int j=0;
-	 for(int i=0 ; i<recordItem.size(); i++)
-	 {
-		 
-		 if(recordItem.get(i).getIsChecked())
-		 {
-			 j=j+1;
-		 }
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		// TODO Auto-generated method stub
+		super.onActivityResult(requestCode, resultCode, data);
 
-	 }
-		
-	 return j;
-}
+		if (requestCode == REQUEST_CODE) {
+
+		}
+	}
+
+	private int checkedItems(ArrayList<CommonListItems> recordItem) {
+		int j = 0;
+		for (int i = 0; i < recordItem.size(); i++) {
+
+			if (recordItem.get(i).getIsChecked()) {
+				j = j + 1;
+			}
+
+		}
+
+		return j;
+	}
 
 }

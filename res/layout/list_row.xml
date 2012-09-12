@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="90dp"
-    android:orientation="horizontal"
+   
     android:padding="5dip" >
 
     <!-- ListRow Left sied Thumbnail image -->
@@ -10,7 +10,8 @@
     <LinearLayout
         android:id="@+id/thumbnail"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true" >
 
         <ImageView
             android:id="@+id/list_item_checkbox_image"
@@ -25,8 +26,9 @@
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dip"
-        android:layout_marginRight="5dip"
+        android:layout_toRightOf="@id/thumbnail"
+      
+        android:layout_marginLeft="5dp"
         android:gravity="center_vertical"      
         android:textColor="@color/common_text_color"
         android:textSize="@dimen/common_text_size" />
@@ -35,10 +37,11 @@
         android:id="@+id/arrow_img"
         android:layout_width="16dp"
         android:layout_height="16dp"
-        android:layout_marginLeft="200dip"      
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="5dp"      
         android:background="@drawable/list_arrow"
         android:scaleType="fitCenter" />
     
-   <!--  android:visibility="invisible" -->
+ 
 
-</LinearLayout>
+</RelativeLayout>
