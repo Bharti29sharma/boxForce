@@ -80,8 +80,8 @@ public class UserInfo extends Activity {
     private void onNotLoggedIn() {
         Toast.makeText(getApplicationContext(), "You are not logged in.", Toast.LENGTH_SHORT)
             .show();
-        Intent intent = new Intent(this, Splash.class);
-        startActivity(intent);
+       /* Intent intent = new Intent(this, Splash.class);
+        startActivity(intent);*/
         finish();
     }
 }

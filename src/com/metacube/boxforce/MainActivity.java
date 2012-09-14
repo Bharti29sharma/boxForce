@@ -64,6 +64,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	String encodedImage = "";
 	File fileS;
 	int PICK_REQUEST_CODE = 0;
+	int REQUEST_CODE = 1;
 	String pathS;
 	ArrayList<String> str = new ArrayList<String>();
 
@@ -75,10 +76,8 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		getString(R.string.api_version);
 
-		
 		CookieSyncManager.createInstance(this);
 
-		
 		passcodeManager = ForceApp.APP.getPasscodeManager();
 
 		// Setup view
@@ -89,7 +88,6 @@ public class MainActivity extends Activity implements OnClickListener {
 	public void onResume() {
 		super.onResume();
 
-		
 		if (passcodeManager.onResume(this)) {
 
 			// Login options
@@ -112,16 +110,12 @@ public class MainActivity extends Activity implements OnClickListener {
 							}
 							Constants.client = client;
 
-						
-
 							BoxAuthenticationFunctionality();
 
 						}
 					});
 		}
 	}
-
-	
 
 	@Override
 	public void onUserInteraction() {
@@ -147,20 +141,35 @@ public class MainActivity extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
 		if (v == loginButton) {
-		
 
+			/*
+			 * Intent intent = new Intent(MainActivity.this,
+			 * Authentication.class); startActivity(intent);
+			 */
 			Intent intent = new Intent(MainActivity.this, Authentication.class);
-			startActivity(intent);
-			//finish();
+			startActivityForResult(intent, REQUEST_CODE);
+			// finish();
 
 		}
-		
 
 	}
 
-	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == REQUEST_CODE) {
+			if (resultCode == 0) {
+				MainActivity.this.finish();
+				Intent intent = new Intent(MainActivity.this, Browse.class);
+				startActivity(intent);
+			}
+
+		}
+
+	}
+
 	private void BoxAuthenticationFunctionality() {
-		
+
 		if (Constants.API_KEY == null) {
 			Toast.makeText(
 					getApplicationContext(),
@@ -170,15 +179,13 @@ public class MainActivity extends Activity implements OnClickListener {
 			return;
 		}
 
-		
-
 		final SharedPreferences prefs = getSharedPreferences(
 				Constants.PREFS_FILE_NAME, 0);
 		final String authToken = prefs.getString(
 				Constants.PREFS_KEY_AUTH_TOKEN, null);
 		if (authToken == null) {
-			
-		onNotLoggedIn();
+
+			onNotLoggedIn();
 
 		} else {
 			// We have an auth token. Let's execute getAccountInfo() and put the
@@ -195,15 +202,14 @@ public class MainActivity extends Activity implements OnClickListener {
 					if (status
 							.equals(GetAccountInfoListener.STATUS_GET_ACCOUNT_INFO_OK)
 							&& boxUser != null) {
-						
-						Intent intent = new Intent(MainActivity.this, Browse.class);
+
+						Intent intent = new Intent(MainActivity.this,
+								Browse.class);
 						startActivity(intent);
 						finish();
-						
-						
-						
+
 					} else {
-						
+
 						onNotLoggedIn();
 					}
 				}
@@ -220,11 +226,10 @@ public class MainActivity extends Activity implements OnClickListener {
 	}
 
 	private void onNotLoggedIn() {
-		 setContentView(R.layout.splash);
-		 loginButton = (Button) findViewById(R.id.loginButton);
-		 loginButton.setOnClickListener(MainActivity.this);
-		
-		
+		setContentView(R.layout.splash);
+		loginButton = (Button) findViewById(R.id.loginButton);
+		loginButton.setOnClickListener(MainActivity.this);
+
 	}
 
 }
