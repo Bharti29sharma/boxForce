@@ -30,7 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -39,7 +38,6 @@ import android.view.View.OnClickListener;
 import android.webkit.CookieSyncManager;
 import android.widget.Button;
 import android.widget.ListAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.box.androidlib.Box;
@@ -142,10 +140,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		// TODO Auto-generated method stub
 		if (v == loginButton) {
 
-			/*
-			 * Intent intent = new Intent(MainActivity.this,
-			 * Authentication.class); startActivity(intent);
-			 */
+			
 			Intent intent = new Intent(MainActivity.this, Authentication.class);
 			startActivityForResult(intent, REQUEST_CODE);
 			// finish();

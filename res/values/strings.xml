@@ -19,7 +19,17 @@
     <string name="sample_app">BoxForce</string>
     <string name="continuex">Continue</string>
     <string name="log_in">Log in</string>
-     <string name="choose_object_prompt">Choose an object</string>
-     <string name="choose_record_prompt">Choose a Record</string>
+    <string name="choose_object_prompt">Choose an object</string>
+    <string name="choose_record_prompt">Choose a Record</string>
+    <string name="error_in_file_preview">Unable to open file</string>
+     <string name="download_failed_msg">Download failed</string>
+     <string name="download_msg">Downloading Files..</string>
+     <string name="box_login_error_msg">There is an error</string>
+     <string name="select_file_msg">Select Files</string>
+     <string name="log_out_failed">Log Out Failed</string>
+     <string name="log_in_msg">You are not logged in.</string>
+     <string name="select_record_msg">Select any Record</string>
+      <string name="attach_file_msg">Attaching files..</string>
+     
 	
 </resources>

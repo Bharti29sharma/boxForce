@@ -19,9 +19,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -71,9 +71,12 @@ public class Browse extends Activity implements OnClickListener,
 	View footer;
 	ProgressBar progressBar;
 	boolean editMode = true;
+	ProgressDialog dialog;
 
 	// File fileForPreview;
 	int REQUEST_CODE = 1;
+	int downloadedItemsCount = 0;
+	int checkedItemsCount = 0;
 	ArrayList<String> encodeImgList;
 
 	@Override
@@ -87,7 +90,7 @@ public class Browse extends Activity implements OnClickListener,
 				Constants.PREFS_FILE_NAME, 0);
 		authToken = prefs.getString(Constants.PREFS_KEY_AUTH_TOKEN, null);
 		if (authToken == null) {
-			Toast.makeText(getApplicationContext(), "You are not logged in.",
+			Toast.makeText(getApplicationContext(), getString(R.string.log_in_msg),
 					Toast.LENGTH_SHORT).show();
 			finish();
 			return;
@@ -144,7 +147,7 @@ public class Browse extends Activity implements OnClickListener,
 						if (!status
 								.equals(GetAccountTreeListener.STATUS_LISTING_OK)) {
 							Toast.makeText(getApplicationContext(),
-									"There was an error.", Toast.LENGTH_SHORT)
+									getString(R.string.box_login_error_msg), Toast.LENGTH_SHORT)
 									.show();
 							progressBar.setVisibility(View.INVISIBLE);
 							finish();
@@ -312,25 +315,29 @@ public class Browse extends Activity implements OnClickListener,
 			if (!editMode) {
 
 				if (checkedItems(items) == 0) {
-					Toast.makeText(Browse.this, "Select Files",
+					Toast.makeText(Browse.this, getString(R.string.select_file_msg),
 							Toast.LENGTH_LONG).show();
 				} else {
 
 					int fileCount = items.size();
-					progressBar.setVisibility(View.VISIBLE);
+					// progressBar.setVisibility(View.VISIBLE);
+					dialog = ProgressDialog.show(Browse.this, "",
+							getString(R.string.download_msg), true);
+					checkedItemsCount = checkedItems(items);
 					for (int position = 0; position < fileCount; position++) {
 						if (items.get(position).getIsChecked()) {
 							downloadfile(items.get(position), false);
 						}
 					}
-					progressBar.setVisibility(View.INVISIBLE);
+					// progressBar.setVisibility(View.INVISIBLE);
 
-					Intent intent = new Intent(Browse.this,
-							SalesForceObjectChooser.class);
-					startActivity(intent);
+					/*
+					 * Intent intent = new Intent(Browse.this,
+					 * SalesForceObjectChooser.class); startActivity(intent);
+					 */
 				}
 			} else {
-				Toast.makeText(Browse.this, "Select any file",
+				Toast.makeText(Browse.this, getString(R.string.select_file_msg),
 						Toast.LENGTH_LONG).show();
 			}
 		}
@@ -342,7 +349,7 @@ public class Browse extends Activity implements OnClickListener,
 						@Override
 						public void onIOException(IOException e) {
 							Toast.makeText(getApplicationContext(),
-									"Logout failed - " + e.getMessage(),
+									getString(R.string.log_out_failed) + e.getMessage(),
 									Toast.LENGTH_LONG).show();
 						}
 
@@ -359,14 +366,14 @@ public class Browse extends Activity implements OnClickListener,
 								editor.remove(Constants.PREFS_KEY_AUTH_TOKEN);
 								editor.commit();
 								Toast.makeText(getApplicationContext(),
-										"Logged out", Toast.LENGTH_LONG).show();
+										getString(R.string.log_out), Toast.LENGTH_LONG).show();
 								Intent i = new Intent(Browse.this,
 										MainActivity.class);
 								startActivity(i);
 								finish();
 							} else {
 								Toast.makeText(getApplicationContext(),
-										"Logout failed - " + status,
+										getString(R.string.log_out_failed) + status,
 										Toast.LENGTH_LONG).show();
 							}
 						}
@@ -396,6 +403,14 @@ public class Browse extends Activity implements OnClickListener,
 								fList.add(destinationFile);
 
 								fileAttch.setList(fList);
+								downloadedItemsCount = downloadedItemsCount + 1;
+								if (downloadedItemsCount == checkedItemsCount) {
+									dialog.dismiss();
+									Intent intent = new Intent(Browse.this,
+											SalesForceObjectChooser.class);
+									startActivity(intent);
+								}
+
 							} else {
 								progressBar.setVisibility(View.INVISIBLE);
 								mimeType = getMimeType(destinationFile
@@ -411,14 +426,18 @@ public class Browse extends Activity implements OnClickListener,
 										startActivity(intent);
 									} catch (Exception e) {
 										e.printStackTrace();
-										Toast.makeText(Browse.this,
-												"File Can't Open", 1).show();
+										Toast.makeText(
+												Browse.this,
+												getString(R.string.error_in_file_preview),
+												Toast.LENGTH_LONG).show();
 
 									}
 
 								} else {
-									Toast.makeText(Browse.this,
-											"File Can't Open", 1).show();
+									Toast.makeText(
+											Browse.this,
+											getString(R.string.error_in_file_preview),
+											Toast.LENGTH_LONG).show();
 									progressBar.setVisibility(View.INVISIBLE);
 								}
 
@@ -438,7 +457,7 @@ public class Browse extends Activity implements OnClickListener,
 						e.printStackTrace();
 						// downloadDialog.dismiss();
 						Toast.makeText(getApplicationContext(),
-								"Download failed " + e.getMessage(),
+								getString(R.string.download_failed_msg) + e.getMessage(),
 								Toast.LENGTH_LONG).show();
 					}
 
@@ -457,15 +476,12 @@ public class Browse extends Activity implements OnClickListener,
 		else if (bytes >= 1024 && bytes <= 1048575)
 			return String.valueOf(bytes / 1024) + "KB";
 
-		else if (bytes >= 1048576 && bytes <= 1073741823)
-		{
-			String  num = String.format("%.2f",  bytes / (1024.0 * 1024.0) );
-					
-		
+		else if (bytes >= 1048576 && bytes <= 1073741823) {
+			String num = String.format("%.2f", bytes / (1024.0 * 1024.0));
+
 			return String.valueOf(num) + "MB";
-			
+
 		}
-			
 
 		return String.valueOf(bytes / (1024.0 * 1024.0 * 1024.0)) + "GB";
 

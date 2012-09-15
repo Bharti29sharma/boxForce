@@ -78,7 +78,7 @@ public class SalesForceObjectChooser extends Activity implements
 				Constants.PREFS_FILE_NAME, 0);
 		authToken = prefs.getString(Constants.PREFS_KEY_AUTH_TOKEN, null);
 		if (authToken == null) {
-			Toast.makeText(getApplicationContext(), "You are not logged in.",
+			Toast.makeText(getApplicationContext(), getString(R.string.log_in_msg),
 					Toast.LENGTH_SHORT).show();
 			finish();
 			return;
@@ -293,13 +293,13 @@ public class SalesForceObjectChooser extends Activity implements
 		if (v == save) {
 			if (checkedItems(recordItems) == 0) {
 				Toast.makeText(SalesForceObjectChooser.this,
-						"Select Any Record", Toast.LENGTH_LONG).show();
+						 getString(R.string.select_record_msg), Toast.LENGTH_LONG).show();
 			}
 
 			else {
 				//progressBar.setVisibility(View.VISIBLE);
 				dialog	 = ProgressDialog.show(SalesForceObjectChooser.this, "", 
-			            "Attaching files..", true);
+						 getString(R.string.attach_file_msg) , true);
 
 				sendToSalesForce(templateApp.getList(), parentIdList);
 			}
@@ -311,7 +311,7 @@ public class SalesForceObjectChooser extends Activity implements
 						@Override
 						public void onIOException(IOException e) {
 							Toast.makeText(getApplicationContext(),
-									"Logout failed - " + e.getMessage(),
+									 getString(R.string.log_out_failed) + e.getMessage(),
 									Toast.LENGTH_LONG).show();
 						}
 
@@ -328,14 +328,14 @@ public class SalesForceObjectChooser extends Activity implements
 								editor.remove(Constants.PREFS_KEY_AUTH_TOKEN);
 								editor.commit();
 								Toast.makeText(getApplicationContext(),
-										"Logged out", Toast.LENGTH_LONG).show();
+										getString(R.string.log_out), Toast.LENGTH_LONG).show();
 								Intent i = new Intent(SalesForceObjectChooser.this,
 										MainActivity.class);
 								startActivity(i);
 								finish();
 							} else {
 								Toast.makeText(getApplicationContext(),
-										"Logout failed - " + status,
+										getString(R.string.log_out_failed) + status,
 										Toast.LENGTH_LONG).show();
 							}
 						}
