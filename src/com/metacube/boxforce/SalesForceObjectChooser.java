@@ -1,4 +1,3 @@
-
 package com.metacube.boxforce;
 
 import java.io.File;
@@ -26,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ParseException;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
@@ -67,7 +67,9 @@ public class SalesForceObjectChooser extends Activity implements
 	Button save, logoutButton;
 	ProgressBar progressBar;
 	ProgressDialog dialog;
-
+	String encodedImage = "";
+	int noOfRequest = 0;
+	int requestCount;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -78,8 +80,8 @@ public class SalesForceObjectChooser extends Activity implements
 				Constants.PREFS_FILE_NAME, 0);
 		authToken = prefs.getString(Constants.PREFS_KEY_AUTH_TOKEN, null);
 		if (authToken == null) {
-			Toast.makeText(getApplicationContext(), getString(R.string.log_in_msg),
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(getApplicationContext(),
+					getString(R.string.log_in_msg), Toast.LENGTH_SHORT).show();
 			finish();
 			return;
 		}
@@ -106,7 +108,7 @@ public class SalesForceObjectChooser extends Activity implements
 
 		if (salesforceRestClient != null) {
 			progressBar.setVisibility(View.VISIBLE);
-			
+
 			sobjectsRequest = RestRequest
 					.getRequestForDescribeGlobal(API_VERSION);
 			salesforceRestClient.sendAsync(sobjectsRequest, this);
@@ -122,7 +124,7 @@ public class SalesForceObjectChooser extends Activity implements
 
 		if (salesforceRestClient != null) {
 			progressBar.setVisibility(View.VISIBLE);
-			//parentIdList = new ArrayList<String>();
+			// parentIdList = new ArrayList<String>();
 			try {
 				String soql = "select id, name from " + item.getName();
 				recordsRequest = RestRequest.getRequestForQuery(API_VERSION,
@@ -164,7 +166,7 @@ public class SalesForceObjectChooser extends Activity implements
 				progressBar.setVisibility(View.INVISIBLE);
 				objectsSpinnerAdapter = new CommonSpinnerAdapter(
 						getLayoutInflater(), items);
-			 objectsSpinnerAdapter.changeOrdering(Constants.SORT_BY_LABEL);
+				objectsSpinnerAdapter.changeOrdering(Constants.SORT_BY_LABEL);
 				objectSpinner.setAdapter(objectsSpinnerAdapter);
 				objectSpinner.setOnItemSelectedListener(this);
 
@@ -199,17 +201,17 @@ public class SalesForceObjectChooser extends Activity implements
 						CommonListItems item = new CommonListItems();
 						JSONObject field = fields.getJSONObject(i);
 
-						//parentIdList.add(field.optString("Id"));
+						// parentIdList.add(field.optString("Id"));
 						item.setId(field.optString("Id"));
 						item.setLabel(field.optString("Name"));
 						item.setIsChecked(false);
 						recordItems.add(item);
 
 					}
-					
-					recordItems =	Constants.changeOrdering(Constants.SORT_BY_LABEL,recordItems);
-					
-					
+
+					recordItems = Constants.changeOrdering(
+							Constants.SORT_BY_LABEL, recordItems);
+
 					progressBar.setVisibility(View.INVISIBLE);
 					adapter = new AdapterBaseClass(
 							SalesForceObjectChooser.this, recordItems);
@@ -230,16 +232,27 @@ public class SalesForceObjectChooser extends Activity implements
 		}
 
 		else if (request == attchReq) {
-			//progressBar.setVisibility(View.INVISIBLE);
-			dialog.dismiss();	
+			// progressBar.setVisibility(View.INVISIBLE);
 
 			if (!response.isSuccess()) {
-				Toast.makeText(SalesForceObjectChooser.this, response.toString(),
-						Toast.LENGTH_LONG).show();
-			} else {
 				Toast.makeText(SalesForceObjectChooser.this,
-						"Successfully Attached", Toast.LENGTH_LONG).show();
-				finish();
+						response.toString(), Toast.LENGTH_LONG).show();
+				dialog.dismiss();
+			} else {
+
+				
+				Log.v("requestCount", String.valueOf(requestCount));
+				
+				noOfRequest = noOfRequest + 1;
+
+				//if (noOfRequest == requestCount) {
+					dialog.dismiss();
+					Toast.makeText(SalesForceObjectChooser.this,
+							"Successfully Attached", Toast.LENGTH_LONG).show();
+					finish();
+
+				//}
+
 			}
 
 		}
@@ -248,58 +261,57 @@ public class SalesForceObjectChooser extends Activity implements
 
 	@Override
 	public void onError(Exception exception) {
-		Log.v("Error",exception.getMessage().toString());
+		Log.v("Error", exception.getMessage().toString());
 		exception.printStackTrace();
-		Toast.makeText(SalesForceObjectChooser.this, exception.getMessage().toString(), Toast.LENGTH_LONG)
-				.show();
+		Toast.makeText(SalesForceObjectChooser.this,
+				exception.getMessage().toString(), Toast.LENGTH_LONG).show();
 		progressBar.setVisibility(View.INVISIBLE);
 
 	}
-	
-	
-	
-	
-	public  ArrayList<CommonListItems> changeOrdering(String orderType,ArrayList<CommonListItems> items)
-	{
+
+	public ArrayList<CommonListItems> changeOrdering(String orderType,
+			ArrayList<CommonListItems> items) {
 		// Sort By Name
-		if(orderType.equalsIgnoreCase(Constants.SORT_BY_NAME))
-		{
-			Collections.sort(items, new CommonListComparator(CommonListComparator.COMPARE_BY_NAME));
+		if (orderType.equalsIgnoreCase(Constants.SORT_BY_NAME)) {
+			Collections.sort(items, new CommonListComparator(
+					CommonListComparator.COMPARE_BY_NAME));
 		}
 		// Sort By Date
-		else if(orderType.equalsIgnoreCase(""))
-		{
-			Collections.sort(items, new CommonListComparator(CommonListComparator.COMPARE_BY_SORT_DATA));
+		else if (orderType.equalsIgnoreCase("")) {
+			Collections.sort(items, new CommonListComparator(
+					CommonListComparator.COMPARE_BY_SORT_DATA));
 		}
 		// Sort By id
-		else if (orderType.equalsIgnoreCase(Constants.SORT_BY_ID))
-		{
-			Collections.sort(items, new CommonListComparator(CommonListComparator.COMPARE_BY_ID));
+		else if (orderType.equalsIgnoreCase(Constants.SORT_BY_ID)) {
+			Collections.sort(items, new CommonListComparator(
+					CommonListComparator.COMPARE_BY_ID));
 		}
 		// By default sort by Label
-		else
-		{
-			Collections.sort(items, new CommonListComparator(CommonListComparator.COMPARE_BY_LABEL));
+		else {
+			Collections.sort(items, new CommonListComparator(
+					CommonListComparator.COMPARE_BY_LABEL));
 		}
-		//notifyDataSetChanged();
-		
+		// notifyDataSetChanged();
+
 		return items;
 	}
-	
-	
 
 	@Override
 	public void onClick(View v) {
 		if (v == save) {
 			if (checkedItems(recordItems) == 0) {
 				Toast.makeText(SalesForceObjectChooser.this,
-						 getString(R.string.select_record_msg), Toast.LENGTH_LONG).show();
+						getString(R.string.select_record_msg),
+						Toast.LENGTH_LONG).show();
 			}
 
 			else {
-				//progressBar.setVisibility(View.VISIBLE);
-				dialog	 = ProgressDialog.show(SalesForceObjectChooser.this, "", 
-						 getString(R.string.attach_file_msg) , true);
+				// progressBar.setVisibility(View.VISIBLE);
+				dialog = ProgressDialog.show(SalesForceObjectChooser.this, "",
+						getString(R.string.attach_file_msg), true);
+				 requestCount = templateApp.getList().size()
+						* parentIdList.size();
+				
 
 				sendToSalesForce(templateApp.getList(), parentIdList);
 			}
@@ -310,9 +322,11 @@ public class SalesForceObjectChooser extends Activity implements
 
 						@Override
 						public void onIOException(IOException e) {
-							Toast.makeText(getApplicationContext(),
-									 getString(R.string.log_out_failed) + e.getMessage(),
-									Toast.LENGTH_LONG).show();
+							Toast.makeText(
+									getApplicationContext(),
+									getString(R.string.log_out_failed)
+											+ e.getMessage(), Toast.LENGTH_LONG)
+									.show();
 						}
 
 						@Override
@@ -328,15 +342,19 @@ public class SalesForceObjectChooser extends Activity implements
 								editor.remove(Constants.PREFS_KEY_AUTH_TOKEN);
 								editor.commit();
 								Toast.makeText(getApplicationContext(),
-										getString(R.string.log_out), Toast.LENGTH_LONG).show();
-								Intent i = new Intent(SalesForceObjectChooser.this,
+										getString(R.string.log_out),
+										Toast.LENGTH_LONG).show();
+								Intent i = new Intent(
+										SalesForceObjectChooser.this,
 										MainActivity.class);
 								startActivity(i);
 								finish();
 							} else {
-								Toast.makeText(getApplicationContext(),
-										getString(R.string.log_out_failed) + status,
-										Toast.LENGTH_LONG).show();
+								Toast.makeText(
+										getApplicationContext(),
+										getString(R.string.log_out_failed)
+												+ status, Toast.LENGTH_LONG)
+										.show();
 							}
 						}
 					});
@@ -389,61 +407,68 @@ public class SalesForceObjectChooser extends Activity implements
 			ArrayList<String> parentIDLst) {
 
 		int count = filesList.size();
-		String encodedImage = null;
-		String mimeType;
-		String boxFileName;
+
+		// String encodedImage = null;
+		/*
+		 * String mimeType; String boxFileName;
+		 */
+
 		for (int index = 0; index < count; index++) {
 
 			File boxFile = filesList.get(index);
 
 			if (boxFile.canRead()) {
 
-				boxFileName = boxFile.getName();
-				boxFile.getPath();
+				// boxFileName = boxFile.getName();
+				// boxFile.getPath();
 
-				mimeType = getMimeType(boxFile.getPath());
+				// mimeType = getMimeType(boxFile.getPath());
 
-				FileInputStream fileInputStream = null;
+				new EncodeImgInBackground().execute(boxFile);
 
-				byte[] bFile = new byte[(int) boxFile.length()];
+				// encodedImage = encodedImg.toString();
+				/*
+				 * FileInputStream fileInputStream = null;
+				 * 
+				 * byte[] bFile = new byte[(int) boxFile.length()];
+				 * 
+				 * 
+				 * // new EncodeImgInBackground().execute(bFile); //
+				 * 
+				 * // convert file into array of bytes try { fileInputStream =
+				 * new FileInputStream(boxFile); fileInputStream.read(bFile);
+				 * fileInputStream.close(); encodedImage =
+				 * Base64.encodeToString(bFile, Base64.DEFAULT); //
+				 * encodeImgList.add(encodedImage);
+				 * 
+				 * } catch (Exception e) { // TODO Auto-generated catch block
+				 * e.printStackTrace(); }
+				 */
 
-				// convert file into array of bytes
-				try {
-					fileInputStream = new FileInputStream(boxFile);
-					fileInputStream.read(bFile);
-					fileInputStream.close();
-					encodedImage = Base64.encodeToString(bFile, Base64.DEFAULT);
-					// encodeImgList.add(encodedImage);
+				/*
+				 * for (int parentIndex = 0; parentIndex < parentIDLst.size();
+				 * parentIndex++) {
+				 * 
+				 * String objectType = "Attachment"; Map<String, Object> fields
+				 * = new HashMap<String, Object>(); fields.put("ParentID",
+				 * parentIDLst.get(parentIndex)); fields.put("Body",
+				 * encodedImage); fields.put("Name", boxFileName); //
+				 * fields.put("ContentType", "image/jpeg");
+				 * fields.put("ContentType", mimeType);
+				 * 
+				 * try {
+				 * 
+				 * attchReq = RestRequest.getRequestForCreate(API_VERSION,
+				 * objectType, fields);
+				 * 
+				 * salesforceRestClient.sendAsync(attchReq, this);
+				 * 
+				 * } catch (Exception e) {
+				 * 
+				 * // progressBar.setVisibility(View.INVISIBLE);
+				 * dialog.dismiss(); }
+				 */
 
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-				for (int parentIndex = 0; parentIndex < parentIDLst.size(); parentIndex++) {
-
-					String objectType = "Attachment";
-					Map<String, Object> fields = new HashMap<String, Object>();
-					fields.put("ParentID", parentIDLst.get(parentIndex));
-					fields.put("Body", encodedImage);
-					fields.put("Name", boxFileName);
-					// fields.put("ContentType", "image/jpeg");
-					fields.put("ContentType", mimeType);
-
-					try {
-
-						attchReq = RestRequest.getRequestForCreate(API_VERSION,
-								objectType, fields);
-
-						salesforceRestClient.sendAsync(attchReq, this);
-
-					} catch (Exception e) {
-						
-						//progressBar.setVisibility(View.INVISIBLE);
-						dialog.dismiss();
-					}
-
-				}
 			}
 		}
 
@@ -520,22 +545,89 @@ public class SalesForceObjectChooser extends Activity implements
 
 	}
 
- private int checkedItems(ArrayList<CommonListItems> recordItem)
- {
-	 int j=0;
-	 parentIdList = new ArrayList<String>();
-	 for(int i=0 ; i<recordItem.size(); i++)
-	 {
-		 
-		 if(recordItem.get(i).getIsChecked())
-		 {
-			 parentIdList.add(recordItem.get(i).getId());
-			 j=j+1;
-		 }
+	private int checkedItems(ArrayList<CommonListItems> recordItem) {
+		int j = 0;
+		parentIdList = new ArrayList<String>();
+		for (int i = 0; i < recordItem.size(); i++) {
 
-	 }
-		
-	 return j;
- }
- }
+			if (recordItem.get(i).getIsChecked()) {
+				parentIdList.add(recordItem.get(i).getId());
+				j = j + 1;
+			}
 
+		}
+
+		return j;
+	}
+
+	class EncodeImgInBackground extends AsyncTask<File, Integer, String> { //
+		// Called to initiate the background activity
+
+		String mimeType;
+		String boxFileName;
+
+		@Override
+		protected String doInBackground(File... bxfile) { //
+			// try {
+
+			boxFileName = bxfile[0].getName();
+			mimeType = getMimeType(bxfile[0].getPath());
+
+			FileInputStream fileInputStream = null;
+
+			byte[] bFile = new byte[(int) bxfile[0].length()];
+
+			try {
+				fileInputStream = new FileInputStream(bxfile[0]);
+				fileInputStream.read(bFile);
+				fileInputStream.close();
+				return Base64.encodeToString(bFile, Base64.DEFAULT);
+				// encodeImgList.add(encodedImage);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+
+				return "";
+			}
+
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) { //
+			super.onProgressUpdate(values);
+
+		}
+
+		// Called once the background activity has completed
+		@Override
+		protected void onPostExecute(String result) { //
+			encodedImage = result;
+
+			for (int parentIndex = 0; parentIndex < parentIdList.size(); parentIndex++) {
+
+				String objectType = "Attachment";
+				Map<String, Object> fields = new HashMap<String, Object>();
+				fields.put("ParentID", parentIdList.get(parentIndex));
+				fields.put("Body", encodedImage);
+				fields.put("Name", boxFileName);
+				// fields.put("ContentType", "image/jpeg");
+				fields.put("ContentType", mimeType);
+
+				try {
+
+					attchReq = RestRequest.getRequestForCreate(API_VERSION,
+							objectType, fields);
+
+					salesforceRestClient.sendAsync(attchReq,
+							SalesForceObjectChooser.this);
+
+				} catch (Exception e) {
+
+					// progressBar.setVisibility(View.INVISIBLE);
+					dialog.dismiss();
+				}
+			}
+
+		}
+	}
+}
