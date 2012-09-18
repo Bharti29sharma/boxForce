@@ -1,8 +1,12 @@
 package com.metacube.boxforce;
 
+import it.sauronsoftware.base64.Base64OutputStream;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -240,18 +244,17 @@ public class SalesForceObjectChooser extends Activity implements
 				dialog.dismiss();
 			} else {
 
-				
 				Log.v("requestCount", String.valueOf(requestCount));
-				
+
 				noOfRequest = noOfRequest + 1;
 
-				//if (noOfRequest == requestCount) {
-					dialog.dismiss();
-					Toast.makeText(SalesForceObjectChooser.this,
-							"Successfully Attached", Toast.LENGTH_LONG).show();
-					finish();
+				// if (noOfRequest == requestCount) {
+				dialog.dismiss();
+				Toast.makeText(SalesForceObjectChooser.this,
+						"Successfully Attached", Toast.LENGTH_LONG).show();
+				finish();
 
-				//}
+				// }
 
 			}
 
@@ -309,9 +312,8 @@ public class SalesForceObjectChooser extends Activity implements
 				// progressBar.setVisibility(View.VISIBLE);
 				dialog = ProgressDialog.show(SalesForceObjectChooser.this, "",
 						getString(R.string.attach_file_msg), true);
-				 requestCount = templateApp.getList().size()
+				requestCount = templateApp.getList().size()
 						* parentIdList.size();
-				
 
 				sendToSalesForce(templateApp.getList(), parentIdList);
 			}
@@ -419,55 +421,7 @@ public class SalesForceObjectChooser extends Activity implements
 
 			if (boxFile.canRead()) {
 
-				// boxFileName = boxFile.getName();
-				// boxFile.getPath();
-
-				// mimeType = getMimeType(boxFile.getPath());
-
-				new EncodeImgInBackground().execute(boxFile);
-
-				// encodedImage = encodedImg.toString();
-				/*
-				 * FileInputStream fileInputStream = null;
-				 * 
-				 * byte[] bFile = new byte[(int) boxFile.length()];
-				 * 
-				 * 
-				 * // new EncodeImgInBackground().execute(bFile); //
-				 * 
-				 * // convert file into array of bytes try { fileInputStream =
-				 * new FileInputStream(boxFile); fileInputStream.read(bFile);
-				 * fileInputStream.close(); encodedImage =
-				 * Base64.encodeToString(bFile, Base64.DEFAULT); //
-				 * encodeImgList.add(encodedImage);
-				 * 
-				 * } catch (Exception e) { // TODO Auto-generated catch block
-				 * e.printStackTrace(); }
-				 */
-
-				/*
-				 * for (int parentIndex = 0; parentIndex < parentIDLst.size();
-				 * parentIndex++) {
-				 * 
-				 * String objectType = "Attachment"; Map<String, Object> fields
-				 * = new HashMap<String, Object>(); fields.put("ParentID",
-				 * parentIDLst.get(parentIndex)); fields.put("Body",
-				 * encodedImage); fields.put("Name", boxFileName); //
-				 * fields.put("ContentType", "image/jpeg");
-				 * fields.put("ContentType", mimeType);
-				 * 
-				 * try {
-				 * 
-				 * attchReq = RestRequest.getRequestForCreate(API_VERSION,
-				 * objectType, fields);
-				 * 
-				 * salesforceRestClient.sendAsync(attchReq, this);
-				 * 
-				 * } catch (Exception e) {
-				 * 
-				 * // progressBar.setVisibility(View.INVISIBLE);
-				 * dialog.dismiss(); }
-				 */
+				new EncodeFileInBackground().execute(boxFile);
 
 			}
 		}
@@ -560,8 +514,52 @@ public class SalesForceObjectChooser extends Activity implements
 		return j;
 	}
 
-	class EncodeImgInBackground extends AsyncTask<File, Integer, String> { //
-		// Called to initiate the background activity
+	private String encodeFileInBase64(File file) {
+
+		StringBuilder sb = new StringBuilder();
+		// StringBuilder sbStr = new StringBuilder((int) (file.length() / 3 *
+		// 8));
+
+		FileInputStream fin = null;
+		try {
+			fin = new FileInputStream(file);
+
+			int bSize = 3000; // 3 * 512;
+			Log.v("fileLength", String.valueOf(file.length()));
+
+			byte[] buf = new byte[bSize];
+
+			int len = 0;
+
+			while ((len = fin.read(buf)) != -1) {
+				Log.v("len", String.valueOf(len));// sbStr.append(new
+													// String(buf, 0, len));
+
+				byte[] encoded = Base64.encode(buf, Base64.DEFAULT);
+
+				sb.append(new String(encoded, 0, len));
+			}
+
+			Log.v("txtFileWithBuffer", sb.toString());
+			
+			fin.close();
+		} catch (IOException e) {
+			if (null != fin) {
+				try {
+					fin.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+
+		String base64EncodedFile = sb.toString();
+
+		return base64EncodedFile;
+
+	}
+
+	class EncodeFileInBackground extends AsyncTask<File, Integer, String> { //
 
 		String mimeType;
 		String boxFileName;
@@ -572,6 +570,8 @@ public class SalesForceObjectChooser extends Activity implements
 
 			boxFileName = bxfile[0].getName();
 			mimeType = getMimeType(bxfile[0].getPath());
+			
+				encodeFileInBase64(bxfile[0]);
 
 			FileInputStream fileInputStream = null;
 
@@ -581,14 +581,27 @@ public class SalesForceObjectChooser extends Activity implements
 				fileInputStream = new FileInputStream(bxfile[0]);
 				fileInputStream.read(bFile);
 				fileInputStream.close();
-				return Base64.encodeToString(bFile, Base64.DEFAULT);
+				String fileTxt = Base64.encodeToString(bFile, Base64.DEFAULT);
+				Log.v("txtFileWithoutBuffer", fileTxt);
+				
+				return fileTxt;
+
 				// encodeImgList.add(encodedImage);
 
 			} catch (Exception e) {
+
 				e.printStackTrace();
 
 				return "";
 			}
+
+			/*
+			 * InputStream is = new FileInputStream(bxfile[0]); OutputStream out
+			 * = new Base64OutputStream(base64OutputStream) IOUtils.copy(is,
+			 * out); is.close(); out.close();
+			 */
+
+			
 
 		}
 
